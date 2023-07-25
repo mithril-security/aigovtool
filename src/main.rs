@@ -41,7 +41,7 @@ use std::fs::File;
 use std::io::Read;
 use pem::parse;
 use x509_parser::pem::pem_to_der;
-use x509_parser::parse_x509_der;
+use x509_parser::parse_x509_certificate;
 
 #[derive(Serialize)]
 struct GetQuoteRequest {
@@ -111,7 +111,16 @@ KgopbLUKQTcpVofGLx4ShrlVJ5mue3Zx4OcjR7vm54OhOLSLnhvTaFJVbAFA97Tx
 uKV7UO9aRTUWjDnttqPJMCmsE77DbFvuNl729PqTZ0s9mCSzcV/WMMzeX0NOdEQ=
 -----END CERTIFICATE-----";
 
-// fn request_consumption(inference_number: u32, root_store)
+fn request_consumption(inference_number: u32, arc_tls_config: Arc<rustls::ClientConfig>) -> Result<String> {
+    let inference_req = &inference_number.to_string();
+    let agent = ureq::builder()
+        .tls_config(arc_tls_config)
+        .build();
+    let response = agent.post((&format!("{DRM_ADDRESS}/request_consumption")))
+        .send_form(&[("number_inferences", inference_req)])?
+        .into_json()?;
+    Ok(response)
+}
 
 const RUNNER_ADDRESS: &str = "http://127.0.0.1:11000";
 
@@ -255,8 +264,19 @@ fn main() -> Result<()> {
     let mut root_store = rustls::RootCertStore::empty();
     let mut drm_certificate_pem = parse(DRM_CERT).unwrap(); 
     // let mut drm_certificate_der = pem_to_der(drm_certificate_pem).expect("X.509: decoding DER failed");
-    let mut drm_certificate_der = parse_x509_der(&drm_certificate_pem.contents());
+    let mut drm_certificate_der = parse_x509_certificate(&drm_certificate_pem.contents()).unwrap();
     println!("X.509 DRM certificate : {:?}", drm_certificate_der);
+    let mut drm_certificate = drm_certificate_pem.contents().to_vec();
+    root_store.add_parsable_certificates(&[drm_certificate]);
+
+    let tls_config = rustls::ClientConfig::builder()
+        .with_safe_defaults()
+        .with_root_certificates(root_store)
+        .with_no_client_auth();
+
+    
+
+
     let router_management = |request: &rouille::Request| {
         rouille::router!(request,
             (POST) (/upload) => {
