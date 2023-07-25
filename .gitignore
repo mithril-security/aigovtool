@@ -196,3 +196,8 @@ cython_debug/
 manifest.dev.toml
 manifest.prod.toml
 manifest.toml
+
+# drm-certs and src 
+drm-blindai/cert.pem
+drm-blindai/key.pem
+src/cert.pem

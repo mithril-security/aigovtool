@@ -14,7 +14,8 @@ def start(address, upload):
     response = client_v2.upload_model(model=upload)
     click.echo("Connected and model uploaded.")
     click.echo("starting the DRM server...")
-
+    app = drm_server()
+    app.run(host="0.0.0.0", port="6000", ssl_context=('./cert.pem', './key.pem'))
 
 if __name__ == '__main__':
     start()

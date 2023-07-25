@@ -36,6 +36,13 @@ use serde::{Deserialize, Serialize};
 use serde_bytes::Bytes;
 use sgx_isa::{Report, Targetinfo};
 
+use rustls;
+use std::fs::File;
+use std::io::Read;
+use pem::parse;
+use x509_parser::pem::pem_to_der;
+use x509_parser::parse_x509_der;
+
 #[derive(Serialize)]
 struct GetQuoteRequest {
     enclave_report: Report,
@@ -69,6 +76,42 @@ pub struct SgxCollateral {
     pub pck_certificate: String,       // PCK certificate in PEM format
     pub pck_signing_chain: String,     // PCK signing chain in PEM format
 }
+
+// Consumption tracking 
+const DRM_ADDRESS: &str = "https://127.0.0.1:6000";
+const DRM_CERT: &'static str = "-----BEGIN CERTIFICATE-----
+MIIFazCCA1OgAwIBAgIUcXVJ7yAinVwU9YvGNQmGYmNKssAwDQYJKoZIhvcNAQEL
+BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
+GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDAeFw0yMzA3MjUxMTU3NDlaFw0yNDA3
+MjQxMTU3NDlaMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEw
+HwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggIiMA0GCSqGSIb3DQEB
+AQUAA4ICDwAwggIKAoICAQC6bw+3WkBwYnGK6Vkgwu3U0bCks07N4rHK8fKharXG
+3NrLP14p6VJH4WnrVrfOdK8U3N5aRhbWLx9jplKiSFYHMJLMYk6wEu9aBWadAU+3
+X4iKg3+55Xjdblb9BIp5dgJfbfQWF9a05No28HwFXp6Z+huJVE3kbwHc96E5IRGb
+omGN2yyFtSv4oApJcaliOzyuh+UWFoNfGuHBhtFO0eEKN6h9OcwMgiMijS+3BmaX
+mCa7ffhnvLlO0e/HM0IccilJRGMipLDSnpkKiDGqIEAE/qMfY0aw70hV8x/TJ5F3
+5CNW+e/DnjJnlbK7Iv+wEHcb9UVcRNJ4hzC0lUWMx93VCl78swACxIQ1++fnbTMw
+EHZSJzuyRTDnghoHISxGeNUcJF6ueykHyPmMIep7Qyi3uTfkjjXyzXmTtCx6Ax5w
+VU1aCu678dazpEuTqARJiHS8LMvD6eD5VW8zPhdInPWRgFU+9d9SYyxBTuHYM8FN
+n7cNMnEHfBveEA/9leEvU8oBwG8k/x20eqIBY4RTCHX/goULNm0NgODJeoklsxvh
+A4Nn8oD0LX8vt9GKNJPBJIgs0iJSg2JBHCISa925GMiusCwMLTYfuEekcw7CDV75
+NhHkvx5zZZlmDgxnzBgbGO847LPa9xDGkilvsOR4m7yDUMTP5Rhokl9Ix2XLGGlp
+pwIDAQABo1MwUTAdBgNVHQ4EFgQUA4tp/FIvU2zOUteDT+UwHaMdiPcwHwYDVR0j
+BBgwFoAUA4tp/FIvU2zOUteDT+UwHaMdiPcwDwYDVR0TAQH/BAUwAwEB/zANBgkq
+hkiG9w0BAQsFAAOCAgEAhBNECpiDsVbXt2x5MaGkYkxCe4C0rfOiG0Zth+siJhfm
+1MwDY4jcMHygoHtz4da/YfoxkqXGfyDAEHbwsA+f7XDl0Rv8SMVB1htvUbzl/FAf
+DREZVui/jFO30Coh+PA6zL2W/RGl4XGQmfcHcrMj/fXz6TlCUjjyQhdU13tVqAkT
+jCe8LEuHLjrAre1M5hEFqvPPRdCApBkNIv4+OKoP55MhCV6vBZCaO90DNq/elwwj
+EemNIdOMcy9NwC1xV7EWdH0RNxcnbw50/XdP8ruVuREZkKaGeKddbW3xb7hsKjOo
+8tFq9IqG1lDHBwQaCRIJne2fDRyq3fZjtQ8aVSnMJN8CKf3TWc194H5crCHt2ClI
+p6V4hN0wOnh/WvxsF9T3zrHm4yrc65pZ7UBMWy/Nw9hMu/pxFSCFEF0qe0m2KiUy
+X+TRRuxdIRrW4AKDXE5SDW0hjmt3Qhp3bJXd0ApyHNG7dq0hPyK5Nn7nr4FDbzN9
+ROX3KIykteJlgD+0o+NKGRTBys18Tlz8f+9CDggYnSgUhBkltmczn9j/L/AcfK4y
+KgopbLUKQTcpVofGLx4ShrlVJ5mue3Zx4OcjR7vm54OhOLSLnhvTaFJVbAFA97Tx
+uKV7UO9aRTUWjDnttqPJMCmsE77DbFvuNl729PqTZ0s9mCSzcV/WMMzeX0NOdEQ=
+-----END CERTIFICATE-----";
+
+// fn request_consumption(inference_number: u32, root_store)
 
 const RUNNER_ADDRESS: &str = "http://127.0.0.1:11000";
 
@@ -203,7 +246,17 @@ fn main() -> Result<()> {
         rouille::Server::new("0.0.0.0:9923", router).expect("Failed to start unattested server");
 
     let (_unattested_handle, _unattested_sender) = unattested_server.stoppable();
-
+    // set up connection to the DRM 
+    /**
+        DANGEROUS: All what is written here MUST be changed for production modes. 
+        It is only to demonstrate that we can establish connection with a known DRM
+        server for consumption tracking
+    **/
+    let mut root_store = rustls::RootCertStore::empty();
+    let mut drm_certificate_pem = parse(DRM_CERT).unwrap(); 
+    // let mut drm_certificate_der = pem_to_der(drm_certificate_pem).expect("X.509: decoding DER failed");
+    let mut drm_certificate_der = parse_x509_der(&drm_certificate_pem.contents());
+    println!("X.509 DRM certificate : {:?}", drm_certificate_der);
     let router_management = |request: &rouille::Request| {
         rouille::router!(request,
             (POST) (/upload) => {
@@ -268,7 +321,7 @@ fn main() -> Result<()> {
         }
     });
 
-    println!("BlindAI server is running on the ports 9923 and 9924");
+    println!("BlindAI server is running on the ports 9923 and 9924 for run and 9925 for management");
 
     // Emit the telemetry `Started` event
     telemetry::add_event(telemetry::TelemetryEventProps::Started {}, None, None);

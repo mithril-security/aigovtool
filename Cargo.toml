@@ -38,6 +38,8 @@ lazy_static = "1.4.0"
 webpki-roots = "0.23.0"
 rustls = {version="0.20.8", features=["dangerous_configuration"]}
 webpki = "0.22.0"
+pem = "2.0.1"
+x509-parser = "0.15.0"
 
 [dev-dependencies]
 image = "0.24.1"
