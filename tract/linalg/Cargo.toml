@@ -1,0 +1,99 @@
+[package]
+name = "tract-linalg"
+version = "0.18.2-pre"
+license = "MIT/Apache-2.0"
+authors = ["Mathieu Poumeyrol <kali@zoy.org>"]
+description = "Tiny, no-nonsense, self contained, TensorFlow and ONNX inference"
+repository = "https://github.com/snipsco/tract"
+keywords = ["TensorFlow", "NeuralNetworks"]
+categories = ["science"]
+autobenches = false
+edition = "2018"
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+derive-new = "0.5.9"
+downcast-rs = "1.2.0"
+dyn-clone = "1.0.4"
+lazy_static = "1.4.0"
+log = "0.4.14"
+num-traits = "0.2.14"
+tract-data = { version = "0.18.2-pre", path = "../data" }
+paste = "1.0.5"
+scan_fmt = "0.2.6"
+
+[build-dependencies]
+cc = "1.0.69"
+liquid = "0.26"
+liquid-core = "0.26"
+unicode-normalization = "0.1.19"
+smallvec = "1.6.1"
+walkdir = "2.3.2"
+half = "2"
+
+[dev-dependencies]
+criterion = "0.3.5"
+proptest = "1.0.0"
+
+[features]
+# This feature is meant to accomodate very restrictive / legacy toolchains that do
+# have support for fp16 instructions, breaking tract compilation.
+# It is not meant to be used in other situations, where run-time detection is
+# preferred.
+no_fp16 = []
+default = []
+
+[[bench]]
+bench = false
+name = "arm64"
+harness = false
+
+[[bench]]
+name = "mat_vec"
+harness = false
+
+[[bench]]
+name = "mm_for_wavenet_hw"
+harness = false
+
+[[bench]]
+name = "conv_for_wavenet_hw"
+harness = false
+
+[[bench]]
+name = "mm_for_inception"
+harness = false
+
+[[bench]]
+name = "mm_for_asr_am"
+harness = false
+
+[[bench]]
+name = "sigmoid"
+harness = false
+
+[[bench]]
+bench = false
+name = "arm64simd"
+harness = false
+
+[[bench]]
+bench = false
+name = "arm32neon"
+harness = false
+
+[[bench]]
+bench = false
+name = "packing"
+harness = false
+
+[[bench]]
+bench = false
+name = "virtual_im2col"
+harness = false
+
+[[bench]]
+name = "x86_64"
+harness = false

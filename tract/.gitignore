@@ -1,0 +1,15 @@
+target
+**/*.rs.bk
+*.rustfmt
+*.back
+Cargo.lock
+examples/data
+.idea
+.cached/**
+flamegraph.svg
+perf.data*
+readings.*
+metrics
+tract.out
+.gdb_history
+/issue-*

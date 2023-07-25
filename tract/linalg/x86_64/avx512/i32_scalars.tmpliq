@@ -1,0 +1,10 @@
+// vim: set syntax=asm :
+{% unless arch %}
+   {% assign arch = "ymm" %}
+{% endunless %}
+{% include "zmm_scalar.tmpliq" label:"scalar_min", op:"vpminsd", from:from, to:to, arch:arch %}
+{% include "zmm_scalar.tmpliq" label:"scalar_max", op:"vpmaxsd", from:from, to:to, arch:arch %}
+{% include "zmm_scalar.tmpliq" label:"scalar_mul", op:"vpmulld", from:from, to:to, arch:arch %}
+{% include "zmm_scalar.tmpliq" label:"scalar_add", op:"vpaddd", from:from, to:to, arch:arch %}
+{% include "zmm_scalar.tmpliq" label:"scalar_sub", op:"vpsubd", from:from, to:to, arch:arch %}
+{% include "zmm_scalar.tmpliq" label:"scalar_sub_flipped", op:"vpsubd", from:from, to:to, flipped: true, arch:arch %}

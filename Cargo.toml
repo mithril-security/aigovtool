@@ -1,0 +1,68 @@
+[package]
+name = "blindai_server"
+version = "0.6.3"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.66"
+bytes = "1.2.1"
+env_logger = {version = "0.10.0", default-features = false}
+log = {version = "0.4.17", features = ["release_max_level_trace"]}
+num-derive = "0.3.3"
+num-traits = "0.2.15"
+rand = "0.8.5"
+# Do NOT enable features=["pem"] pem-encoding provided by the crate is NOT side channel resistant
+rcgen = {version = "0.10.0", default-features = false}
+ring = "0.16.20"
+digest = "0.10.6"
+serde = "1.0.147"
+serde_cbor = "0.11.2"
+serde_json = "1.0.91"
+serde_derive = "1.0.147"
+uuid = {version="1.2.1", features=["v4", "serde"]}
+tract-core = {path="tract/core"} #{version = "0.17.2-pre", features=["untrusted_fs"]}
+tract-onnx = {path="tract/onnx"} #{version = "0.17.2-pre", features=["untrusted_fs"]}
+tract-hir = {path="tract/hir"}  #{version = "0.17.2-pre"}
+# ssl feature is patched to enable TLS support via rustls
+rouille = { path = "rouille", features = ["ssl"] }
+sgx-isa = { version = "0.4.0", features = ["serde"] }
+ureq = {version = "2.5.0", features = ["json", "rustls"]}
+serde_bytes = "0.11.8"
+tiny_http = { path = "tiny-http" }
+cfg-if = "1.0.0"
+lazy_static = "1.4.0"
+# These libraries help to create a custom DNS resolver when making 
+# reqs out of the enclave.
+webpki-roots = "0.23.0"
+rustls = {version="0.20.8", features=["dangerous_configuration"]}
+webpki = "0.22.0"
+
+[dev-dependencies]
+image = "0.24.1"
+
+[patch.crates-io]
+# tiny http uses ring which needs to be patched to work properly 
+# and securely in SGX target
+ring = {path="ring-fortanix"}
+serde_cbor = { git = "https://github.com/mithril-security/cbor.git", tag="v0.11.2-edited" }
+# { git = 'ssh://git@github.com/mithril-security/ring.git', branch="fortanix-target"}
+
+
+[package.metadata.fortanix-sgx]
+# stack size (in bytes) for each thread, the default stack size is 0x20000.
+stack-size=0x400000
+# heap size (in bytes), the default heap size is 0x2000000.
+heap-size=0x4FBA00000
+# the default number of threads is equal to the number of available CPUs of
+# the current system.
+# Gotcha: Don't forget to count the main thread when counting number of
+# threads.
+threads=32
+# SSA frame size (in pages) for each thread, the default SSA frame size is 1.
+# You normally don't need to change the SSA frame size.
+ssaframesize=1
+# whether to enable EDP debugging features in the enclave, debugging is
+# enabled by default.
+debug=false

@@ -1,0 +1,51 @@
+[workspace]
+members = [
+    "data",
+    "linalg",
+    "core",
+    "pulse",
+    "pulse-opl",
+    "hir",
+    "nnef",
+    "tensorflow",
+    "onnx-opl",
+    "onnx",
+    "kaldi",
+    "cli",
+    "examples/tensorflow-mobilenet-v2",
+    "examples/jupyter-keras-tract-tf1",
+    "examples/jupyter-keras-tract-tf2",
+    "examples/nnef-dump-mobilenet-v2",
+    "examples/nnef-mobilenet-v2",
+    "examples/onnx-mobilenet-v2",
+    "examples/pytorch-albert-v2",
+    "examples/pytorch-resnet",
+    "harness/core-proptest-pulse",
+    "harness/lstm-proptest-onnx-vs-tf",
+    "harness/nnef-inceptionv3",
+    "harness/onnx-test-suite",
+    "harness/tf-inceptionv3",
+    "harness/tf-mobilenet-v2",
+    "harness/tf-moz-deepspeech",
+]
+
+[profile.opt-no-lto]
+inherits="release"
+lto=false
+
+[profile.release]
+lto = true
+
+[profile.bench]
+debug = true
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.dev.package.darling_macro]
+opt-level = 0 # work around never ending build on wondows
+
+[profile.dev.build-override]
+debug = false
+# strip = "debuginfo" does not work on android and ios
+incremental = false
