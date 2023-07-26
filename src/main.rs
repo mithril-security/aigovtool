@@ -116,10 +116,22 @@ fn request_consumption(inference_number: u32, arc_tls_config: Arc<rustls::Client
     let agent = ureq::builder()
         .tls_config(arc_tls_config)
         .build();
-    let response = agent.post((&format!("{DRM_ADDRESS}/request_consumption")))
+    let response = agent.post(&format!("{DRM_ADDRESS}/request_consumption"))
         .send_form(&[("number_inferences", inference_req)])?
         .into_json()?;
     Ok(response)
+}
+
+fn request_model_consumed(arc_tls_config: Arc<rustls::ClientConfig>) -> Result<String> {
+
+    let mut agent = ureq::builder()
+        .tls_config(arc_tls_config)
+        .build();
+    let response = agent.post(&format!("{DRM_ADDRESS}/consume_model"))
+        .call()?
+        .into_json()?;
+    Ok(response)
+
 }
 
 const RUNNER_ADDRESS: &str = "http://127.0.0.1:11000";
@@ -274,19 +286,27 @@ fn main() -> Result<()> {
         .with_root_certificates(root_store)
         .with_no_client_auth();
 
-    
-
+    #[derive(Serialize)]
+    struct DrmStatus {
+        status: String,
+    }
 
     let router_management = |request: &rouille::Request| {
         rouille::router!(request,
             (POST) (/upload) => {
                 let reply = EXCHANGER.send_model(request);
+                // add request handle to send the number of inferences needed
+
                 EXCHANGER.respond(request, reply)
             },
 
             (POST) (/delete) => {
                 let reply = EXCHANGER.delete_model(request);
                 EXCHANGER.respond(request, reply)
+            },
+
+            (POST) (/drm-status) => {
+                rouille::Response::json(&DrmStatus {status : "up".to_string()})
             },
             _ => rouille::Response::empty_404()
         )
@@ -316,6 +336,7 @@ fn main() -> Result<()> {
     let router = move |request: &rouille::Request| {
         rouille::router!(request,
             (POST) (/run) => {
+                // TODO: add condition to verify the drm number of requests
                 let reply = EXCHANGER.run_model(request);
                 EXCHANGER.respond(request, reply)
             },
@@ -346,6 +367,8 @@ fn main() -> Result<()> {
     // Emit the telemetry `Started` event
     telemetry::add_event(telemetry::TelemetryEventProps::Started {}, None, None);
     _unattested_handle.join().unwrap();
+
+
 
     Ok(())
 }
