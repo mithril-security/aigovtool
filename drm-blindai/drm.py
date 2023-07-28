@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import json
 
 
@@ -31,18 +31,22 @@ def drm_server():
     @app.route('/consume_model', methods=['POST'])
     def consume_model():
         if request.method == "POST":
+            req = request.form['run_model']
+            print("* [GET: /consume_model] Model running :" + req)
             number_inferences = 0
-            with open('inferences.json', 'r+') as f: 
+            with open('inferences.json', 'r') as f: 
                 number_inferences = int(json.load(f)["inferences"])
-                f.seek(0)
-                if number_inferences > 0:
-                    number_inferences -= 1
-                    print("* [POST: /consume_model] Model ran by user : " + request.form['user'] + ". Number of inferences remaining : " + str(number_inferences))
-                else: 
-                    print("* [POST: /consume_model] No inferences left for user : " + request.form['user'] + ". Model not allowed to run.")
+            if number_inferences > 0:
+                number_inferences -= 1
+                print(number_inferences)
+            else: 
+                print("None")
+            with open('inferences.json', 'w') as fw: 
+                fw.seek(0)
+                json.dump({"inferences" : str(number_inferences)}, fw) 
 
-                json.dump({"inferences": str(number_inferences)},f)
-                return {"inferences": number_inferences}
+            return jsonify({"inferences": str(number_inferences)})
         else:
             return {"error" : "Method not allowed"}
+
     return app

@@ -1,6 +1,6 @@
 use ureq::Agent;
 
-mod fixed_resolver {
+pub mod fixed_resolver {
 
     //! A DNS resolver that always returns the same value regardless of
     //! the host it was queried for.

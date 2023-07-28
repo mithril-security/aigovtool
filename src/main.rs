@@ -28,6 +28,8 @@ use log::debug;
 mod telemetry;
 mod ureq_dns_resolver;
 use telemetry::Telemetry;
+use crate::ureq_dns_resolver::InternalAgent;
+use crate::ureq_dns_resolver::fixed_resolver;
 
 // ra
 use env_logger::Env;
@@ -77,48 +79,68 @@ pub struct SgxCollateral {
     pub pck_signing_chain: String,     // PCK signing chain in PEM format
 }
 
+// ----------------------------------------------------------------
 // Consumption tracking 
-const DRM_ADDRESS: &str = "https://127.0.0.1:6000";
-const DRM_CERT: &'static str = "-----BEGIN CERTIFICATE-----
-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
-mWcerMrV8WCIoyG17iVTeTQUXJL9+h1CC/Vt
+const DRM_ADDRESS: &str = "https://localhost:6000";
+
+const DRM_IP: &str = "127.0.0.1";
+
+const DRM_PORT: &str = "6000";
+
+const DRM_ROOT_CA : &'static str = "-----BEGIN CERTIFICATE-----
+MIIDIzCCAgugAwIBAgIULR+skivFs9d++XkdEIARmQu05KwwDQYJKoZIhvcNAQEL
+BQAwITELMAkGA1UEBhMCRlIxEjAQBgNVBAMMCWxvY2FsaG9zdDAeFw0yMzA3Mjgx
+MTEzNDlaFw0yNjA1MTcxMTEzNDlaMCExCzAJBgNVBAYTAkZSMRIwEAYDVQQDDAls
+b2NhbGhvc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCxiN6jeWlA
+akrN2t2RTqyScpAeBE4TiFO2TbFWZOHSwx7QOHDnxbMqKzWm9KpKYccFb7CRfu/7
+2MNVGqvyuCoxi1QPCvELy6Rf7teNh8LkAFm0DRPyXyMIHvdNV+YFB7bUf8YMlCrg
+0fnqHEd9iVKuXuGg6O7Va9QoSbJb7+gi8M3jfocxdjPlzZX587k/w854tBqaZIJ9
+7aUdL4jbDVgCU6uArf/NCk3af3L3UEwl2ZyhbRcn4lXLKaOYTJxeZZ3BzzIdWDKo
+qolN97jvqW81xDOMTXW5MM4oUBpFpASWOGhmC+1rn0oS2Qrzm0xda3E//QsErkay
+rdPPV6q/Sk+7AgMBAAGjUzBRMB0GA1UdDgQWBBTSwuA9bCTPiWWbdVpTM18qEydu
+vjAfBgNVHSMEGDAWgBTSwuA9bCTPiWWbdVpTM18qEyduvjAPBgNVHRMBAf8EBTAD
+AQH/MA0GCSqGSIb3DQEBCwUAA4IBAQChH9xwkqkbydAjUKjkQSrf8xU5aGx4UOKh
+Kq2mR5P7K3JKqF3Q48s4w/RF5kGoz+63XiMxYytv9Dgn2YJL2K1Kw9LrKw2QUVay
+nXSXMYsTZP8+n+olYnhD5qyWS/PWmywbrHYrxmwxieYv727xaKIV9E/95FlIVz8s
+8lx3DCJM6fGPSl5PlPj0oHhJRbDJ/Qf1sE8k+8jnD8LPthO1poomcKH3oqcJDCGl
+wCLUFz3yqNrV2oKDuMxtDbFfAAEwQL0ZPp6+YVL+xyT6LeD2EXRslooY2dcNmzUL
+EMn1WQ7BCNwlZTfnkkN6soi4ZKCZMaavcPH6vRoqHCGqUyQHsrI4
 -----END CERTIFICATE-----";
 
-fn request_consumption(inference_number: u32, arc_tls_config: &Arc<rustls::ClientConfig>) -> Result<String> {
+const DRM_CERT: &'static str = "-----BEGIN CERTIFICATE-----
+MIIDnDCCAoSgAwIBAgIUQ391hUDaIeqJPp9/l0ALKGmUqPowDQYJKoZIhvcNAQEL
+BQAwITELMAkGA1UEBhMCRlIxEjAQBgNVBAMMCWxvY2FsaG9zdDAeFw0yMzA3Mjgx
+MTE0MjVaFw0yNjA1MTcxMTE0MjVaMGsxCzAJBgNVBAYTAkZSMRQwEgYDVQQIDAtJ
+bGVkZWZyYW5jZTEOMAwGA1UEBwwFUGFyaXMxHDAaBgNVBAoME21pdGhyaWwtY2Vy
+dGlmaWNhdGUxGDAWBgNVBAMMD2xvY2FsaG9zdC5sb2NhbDCCASIwDQYJKoZIhvcN
+AQEBBQADggEPADCCAQoCggEBAO87YzZzynoDYXQ+JSL5nFYoXc11NAkyRsnEw5Ye
+CxiXBBk2gZn1Ta949nhWnqdXMWz68K/SUWn8Df3BVy8eYR2O1EQY5RNlKfBXG75S
+lLq1U8h7q9d7X26uNEbztQfU8ZKeTkw8cTkhR/maxkkBuBJr0od8ZKCr/U0KoMFH
+tEvzgRot2XcMKmt5ftmOI9N9VNgT3ESsoTcu61qAWYuQ9WcLDXCyh0Q3wa72FHnL
+0rBURA6zuPqoY3RY9x175yruBhgHQ9laJ66kyMKHnV03dqrL+ZtrAqCMfWqlcRBV
+AbaaurJMVMa1BE62FXuNAcnsu3x2Mx1on/5tNTeeeMT8ydkCAwEAAaOBgTB/MB8G
+A1UdIwQYMBaAFNLC4D1sJM+JZZt1WlMzXyoTJ26+MAkGA1UdEwQCMAAwCwYDVR0P
+BAQDAgTwMCUGA1UdEQQeMByCCWxvY2FsaG9zdIIPbG9jYWxob3N0LmxvY2FsMB0G
+A1UdDgQWBBTQmgQ8D/iqyqWEycqGTGfFJFnjZTANBgkqhkiG9w0BAQsFAAOCAQEA
+M1pgbHIV5C0K7C1z/2zaGXILVsTxdm5eX9OshqXWn6YOVk5Daloy2RzQMiWedQZT
+oqZ0+L9ImAd+w1YK3p1ACqWb9nw/EjhDwxgSdfebEwU97v3bJPt9wBRs7luAD3zk
+HDSDJe7oxHueTeCGKgeGJ9uoO21+bsDMkPePqpyIlbbfzRcX9MSQpas0GcyAnyYj
+Ez/3tBykFXsKiDKMYFt5DHQKL843hwN5fSNtDXYyh19EeChfxcnhbZL35qsTSjZT
+QzmNtCVuE8fuySqT7WOdf70LUOoonu6diXUrufg4kxmcE1+Z/yVfHf4upXyUAm5M
+78rBGYvykqo3p92JpCdpww==
+-----END CERTIFICATE-----";
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct InferencesTracking {
+    inferences: String
+}
+
+
+fn request_consumption(inference_number: u32, ip: &str, port: &str, arc_tls_config: &Arc<rustls::ClientConfig>) -> Result<InferencesTracking> {
     let inference_req = &inference_number.to_string();
     let agent = ureq::builder()
         .tls_config(arc_tls_config.clone())
+        .resolver(fixed_resolver::FixedResolver(format!("{ip}:{port}").parse().unwrap()))
         .build();
     let response = agent.post(&format!("{DRM_ADDRESS}/request_consumption"))
         .send_form(&[("number_inferences", inference_req)])?
@@ -126,17 +148,20 @@ fn request_consumption(inference_number: u32, arc_tls_config: &Arc<rustls::Clien
     Ok(response)
 }
 
-fn request_model_consumed(arc_tls_config: Arc<rustls::ClientConfig>) -> Result<String> {
-
-    let mut agent = ureq::builder()
-        .tls_config(arc_tls_config)
+fn request_model_consumed(ip: &str, port: &str, arc_tls_config: &Arc<rustls::ClientConfig>) -> Result<InferencesTracking> {
+    let agent = ureq::builder()
+        .tls_config(arc_tls_config.clone())
+        .resolver(fixed_resolver::FixedResolver(format!("{ip}:{port}").parse().unwrap()))
         .build();
     let response = agent.post(&format!("{DRM_ADDRESS}/consume_model"))
-        .call()?
+        .send_form(&[("run_model", "requested by X")])?
         .into_json()?;
     Ok(response)
 
 }
+
+// ----------------------------------------------------------------
+
 
 const RUNNER_ADDRESS: &str = "http://127.0.0.1:11000";
 
@@ -280,10 +305,14 @@ fn main() -> Result<()> {
     **/
     let mut root_store = rustls::RootCertStore::empty();
     let mut drm_certificate_pem = parse(DRM_CERT).unwrap(); 
+    let mut root_ca_pem = parse(DRM_ROOT_CA).unwrap();
     // let mut drm_certificate_der = pem_to_der(drm_certificate_pem).expect("X.509: decoding DER failed");
     let mut drm_certificate_der = parse_x509_certificate(&drm_certificate_pem.contents()).unwrap();
+    let mut root_ca_der = parse_x509_certificate(&root_ca_pem.contents()).unwrap();
     println!("X.509 DRM certificate : {:?}", drm_certificate_der);
     let mut drm_certificate = drm_certificate_pem.contents().to_vec();
+    let mut root_certificate = root_ca_pem.contents().to_vec();
+    root_store.add_parsable_certificates(&[root_certificate]);
     root_store.add_parsable_certificates(&[drm_certificate]);
 
     let tls_config = rustls::ClientConfig::builder()
@@ -317,7 +346,7 @@ fn main() -> Result<()> {
                 println!("DRM Server running and connected.");
                 println!("Requesting 1000 Inferences.");
 
-                let request_consumption = request_consumption(1000, &arc_tls_config_clone);
+                let request_consumption = request_consumption(3, DRM_IP, DRM_PORT, &arc_tls_config_clone);
                 println!("Consumption requested : {:?}", request_consumption);
                 rouille::Response::json(&DrmStatus {status : "status up received by the Inference server.".to_string()})
             },
@@ -347,15 +376,28 @@ fn main() -> Result<()> {
 
     println!("Models can be managed on 0.0.0.0:9925");
 
-    let router = move |request: &rouille::Request| {
+    let router = {
+        let arc_tls_config_clone = Arc::clone(&tls_config);
+
+        move |request: &rouille::Request| {
         rouille::router!(request,
             (POST) (/run) => {
                 // TODO: add condition to verify the drm number of requests
-                let reply = EXCHANGER.run_model(request);
-                EXCHANGER.respond(request, reply)
+                println!("Running model. Verifying the number of inferences left.");
+                let consume_model = request_model_consumed(DRM_IP, DRM_PORT, &arc_tls_config_clone).unwrap();
+                println!("/run ; {:?}", consume_model.inferences.parse::<u32>().unwrap());
+
+                if (consume_model.inferences.parse::<u32>().unwrap() > 0){
+                    let reply = EXCHANGER.run_model(request);
+                    EXCHANGER.respond(request, reply)
+                } 
+                else {
+                    rouille::Response::json(&DrmStatus {status : "No inferences left available.".to_string()})
+                }
             },
             _ => rouille::Response::empty_404()
         )
+        }
     };
 
     thread::spawn({
