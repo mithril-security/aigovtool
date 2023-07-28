@@ -80,41 +80,45 @@ pub struct SgxCollateral {
 // Consumption tracking 
 const DRM_ADDRESS: &str = "https://127.0.0.1:6000";
 const DRM_CERT: &'static str = "-----BEGIN CERTIFICATE-----
-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
+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
+mWcerMrV8WCIoyG17iVTeTQUXJL9+h1CC/Vt
 -----END CERTIFICATE-----";
 
-fn request_consumption(inference_number: u32, arc_tls_config: Arc<rustls::ClientConfig>) -> Result<String> {
+fn request_consumption(inference_number: u32, arc_tls_config: &Arc<rustls::ClientConfig>) -> Result<String> {
     let inference_req = &inference_number.to_string();
     let agent = ureq::builder()
-        .tls_config(arc_tls_config)
+        .tls_config(arc_tls_config.clone())
         .build();
     let response = agent.post(&format!("{DRM_ADDRESS}/request_consumption"))
         .send_form(&[("number_inferences", inference_req)])?
@@ -269,6 +273,7 @@ fn main() -> Result<()> {
     let (_unattested_handle, _unattested_sender) = unattested_server.stoppable();
     // set up connection to the DRM 
     /**
+     * IN DEVELOPMENT : 
         DANGEROUS: All what is written here MUST be changed for production modes. 
         It is only to demonstrate that we can establish connection with a known DRM
         server for consumption tracking
@@ -282,7 +287,7 @@ fn main() -> Result<()> {
     root_store.add_parsable_certificates(&[drm_certificate]);
 
     let tls_config = rustls::ClientConfig::builder()
-        .with_safe_defaults()
+    .with_safe_defaults()
         .with_root_certificates(root_store)
         .with_no_client_auth();
 
@@ -290,8 +295,11 @@ fn main() -> Result<()> {
     struct DrmStatus {
         status: String,
     }
+    let tls_config = Arc::new(tls_config);
+    let router_management = {
+        let arc_tls_config_clone = Arc::clone(&tls_config);
+        move |request: &rouille::Request| {
 
-    let router_management = |request: &rouille::Request| {
         rouille::router!(request,
             (POST) (/upload) => {
                 let reply = EXCHANGER.send_model(request);
@@ -306,10 +314,16 @@ fn main() -> Result<()> {
             },
 
             (POST) (/drm-status) => {
-                rouille::Response::json(&DrmStatus {status : "up".to_string()})
+                println!("DRM Server running and connected.");
+                println!("Requesting 1000 Inferences.");
+
+                let request_consumption = request_consumption(1000, &arc_tls_config_clone);
+                println!("Consumption requested : {:?}", request_consumption);
+                rouille::Response::json(&DrmStatus {status : "status up received by the Inference server.".to_string()})
             },
             _ => rouille::Response::empty_404()
         )
+        }
     };
 
     thread::spawn({

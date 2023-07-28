@@ -776,6 +776,11 @@ class BlindAiConnection(contextlib.AbstractContextManager):
         r = self._conn.post(f"{self._model_management_url}/delete", bytes_delete_data)
         r.raise_for_status()
 
+    def send_status(self):
+        r = self._conn.post(f"{self._model_management_url}/drm-status", "")
+        r.raise_for_status()
+        return r
+
     def close(self):
         self._conn.close()
 
@@ -786,6 +791,7 @@ class BlindAiConnection(contextlib.AbstractContextManager):
     def __exit__(self, *args):
         """Close the connection to BlindAI server."""
         self.close()
+
 
 
 from functools import wraps
