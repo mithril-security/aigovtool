@@ -16,6 +16,7 @@ use anyhow::{anyhow, Result};
 use log::*;
 use ring::digest::{self, Digest};
 
+use std::hash::Hash;
 use std::sync::RwLock;
 
 use std::{
@@ -44,6 +45,13 @@ impl ModelStore {
                 onnx_by_hash: HashMap::new(),
             }),
         }
+    }
+
+
+    pub fn get_all_model(&self) -> Result<Vec<InferenceModel>> {
+        let mut model_store = self.inner.read().unwrap();
+        let models = model_store.models_by_id.values().cloned().collect::<Vec<InferenceModel>>();
+        Ok(models)
     }
 
     pub fn add_model(

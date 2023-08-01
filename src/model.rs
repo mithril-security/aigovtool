@@ -247,7 +247,7 @@ where
     Ok(slice.to_le_bytes())
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct InferenceModel {
     pub onnx: Arc<OnnxModel>,
     #[allow(unused)]
@@ -347,6 +347,10 @@ impl InferenceModel {
 
     pub fn model_hash(&self) -> Digest {
         self.model_hash
+    }
+
+    pub fn model_id(&self) -> Uuid {
+        self.model_id
     }
 
     pub fn get_output_names(&self) -> Vec<String> {

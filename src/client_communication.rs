@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::model::ModelDatumType;
+use crate::model::{ModelDatumType, self};
 use crate::model_store::ModelStore;
 use crate::telemetry::{self, TelemetryEventProps};
 use anyhow::{Error, Result};
@@ -81,6 +81,24 @@ pub(crate) struct RunModelReply {
     outputs: Vec<SerializedTensor>,
 }
 
+#[derive(Debug, Serialize, Default)]
+struct ModelInfo {
+    model_name : String,
+    model_id : String,
+}
+#[derive(Debug, Serialize, Default)]
+pub(crate) struct GetModelsReply {
+    model_info: Vec<ModelInfo>,
+}
+
+impl GetModelsReply {
+    pub fn new() -> Self {
+        let ret: Vec<ModelInfo> = Vec::new();
+        GetModelsReply { model_info: ret }
+    }
+}
+
+
 /// This model represents the ClientInfo used for telemetry
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ClientInfo {
@@ -101,6 +119,23 @@ impl Exchanger {
             max_model_size,
             max_input_size,
         }
+    }
+
+    pub fn get_models(&self) -> Result<GetModelsReply, Error> {
+        let model_store_clone = self.model_store.clone();
+        let models = model_store_clone.get_all_model().unwrap();
+        let mut models_info = GetModelsReply::new();
+        for model_info in models.into_iter() {
+            let model_name = model_info.model_name();
+            let model_id = model_info.model_id();
+            let model_info_s = ModelInfo {
+                model_id: model_id.to_string(), 
+                model_name: model_name.unwrap().to_string()
+            };
+
+            models_info.model_info.push(model_info_s);
+        }
+        Ok(models_info)
     }
 
     pub fn send_model(&self, request: &rouille::Request) -> Result<SendModelReply, Error> {

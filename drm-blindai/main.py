@@ -20,8 +20,8 @@ def run_server(out_remote_attestation_status, in_server_status):
     
 
 def connect_inference(address, upload, in_remote_attestation_status, out_server_status):
-    click.echo("Connecting to the Inference Server...")
-    client_v2 = connect(addr=address, hazmat_http_on_unattested_port=True)
+    click.echo("Connecting to the Inference Server...") 
+    client_v2 = connect(addr=address, hazmat_http_on_unattested_port=True) # TODO: error handling in case RA failed
     click.echo("Inference server remote attestation completed successfully.")
     click.echo(f"Sending the model {upload}...")
     response = client_v2.upload_model(model=upload)
@@ -39,7 +39,7 @@ def connect_inference(address, upload, in_remote_attestation_status, out_server_
 
 
 @click.command()
-@click.option("--address", prompt="Inference server to connect to (format : domain or IP)", default=1, help='Domain or IP of the inference server. (Default Port for blindai)', type=str)
+@click.option("--address", prompt="Inference server to connect to (format : domain or IP)", default="127.0.0.1", help='Domain or IP of the inference server. (Default Port for blindai)', type=str)
 @click.option("--upload", prompt="Path to the AI model", default=1, help='Path to upload your AI Model (ONNX format).', type=str)
 def start(address, upload):
     remote_attestation_status = queue.Queue()

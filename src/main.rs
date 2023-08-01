@@ -14,7 +14,9 @@
 
 #![forbid(unsafe_code)]
 
+use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::thread;
 mod identity;
 mod model;
@@ -62,6 +64,8 @@ lazy_static! {
         1_000_000,
     ));
     pub static ref TELEMETRY_CHANNEL: Arc<Telemetry> = Arc::new(Telemetry::new().unwrap());
+
+    pub static ref NAME_UUID_HASHMAP: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
 }
 
 // "Native" Rust type for sgx_ql_qve_collateral_t
@@ -159,6 +163,11 @@ fn request_model_consumed(ip: &str, port: &str, arc_tls_config: &Arc<rustls::Cli
     Ok(response)
 
 }
+
+
+// fn get_model_uuids() -> Result<(String, String)> {
+//     let models = EXCHANGER.
+// }
 
 // ----------------------------------------------------------------
 
