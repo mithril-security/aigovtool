@@ -165,9 +165,6 @@ fn request_model_consumed(ip: &str, port: &str, arc_tls_config: &Arc<rustls::Cli
 }
 
 
-// fn get_model_uuids() -> Result<(String, String)> {
-//     let models = EXCHANGER.
-// }
 
 // ----------------------------------------------------------------
 
@@ -359,6 +356,7 @@ fn main() -> Result<()> {
                 println!("Consumption requested : {:?}", request_consumption);
                 rouille::Response::json(&DrmStatus {status : "status up received by the Inference server.".to_string()})
             },
+
             _ => rouille::Response::empty_404()
         )
         }
@@ -396,7 +394,7 @@ fn main() -> Result<()> {
                 let consume_model = request_model_consumed(DRM_IP, DRM_PORT, &arc_tls_config_clone).unwrap();
                 println!("/run ; {:?}", consume_model.inferences.parse::<u32>().unwrap());
 
-                if (consume_model.inferences.parse::<u32>().unwrap() > 0){
+                if consume_model.inferences.parse::<u32>().unwrap() > 0 {
                     let reply = EXCHANGER.run_model(request);
                     EXCHANGER.respond(request, reply)
                 } 
@@ -404,6 +402,12 @@ fn main() -> Result<()> {
                     rouille::Response::json(&DrmStatus {status : "No inferences left available.".to_string()})
                 }
             },
+            (GET) (/request-models) => {
+                println!("Requesting available models.");
+                let reply = EXCHANGER.get_models();
+                EXCHANGER.respond(request, reply)
+
+            }, 
             _ => rouille::Response::empty_404()
         )
         }

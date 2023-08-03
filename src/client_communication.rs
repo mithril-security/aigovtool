@@ -17,6 +17,7 @@ use crate::model_store::ModelStore;
 use crate::telemetry::{self, TelemetryEventProps};
 use anyhow::{Error, Result};
 use log::{error, info};
+use rouille::Request;
 use serde_derive::{Deserialize, Serialize};
 use std::io::Read;
 use std::mem::size_of;
@@ -88,13 +89,13 @@ struct ModelInfo {
 }
 #[derive(Debug, Serialize, Default)]
 pub(crate) struct GetModelsReply {
-    model_info: Vec<ModelInfo>,
+    models_info: Vec<ModelInfo>,
 }
 
 impl GetModelsReply {
     pub fn new() -> Self {
         let ret: Vec<ModelInfo> = Vec::new();
-        GetModelsReply { model_info: ret }
+        GetModelsReply { models_info: ret }
     }
 }
 
@@ -133,7 +134,7 @@ impl Exchanger {
                 model_name: model_name.unwrap().to_string()
             };
 
-            models_info.model_info.push(model_info_s);
+            models_info.models_info.push(model_info_s);
         }
         Ok(models_info)
     }

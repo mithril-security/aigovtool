@@ -196,6 +196,13 @@ class DeleteModel:
     def __init__(self, model_id):
         self.model_id = model_id
 
+@dataclass 
+class GetModels: 
+    models_info: List[str]
+
+    def __init__(self, models_info):
+        self.models_info = models_info
+
 
 @dataclass
 class SendModelReply:
@@ -213,6 +220,18 @@ class RunModelReply:
     def __init__(self, **entries):
         self.__dict__.update(entries)
 
+@dataclass
+class GetModelsReply:
+    models_info: List[Any]
+
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
+
+# @dataclass
+# class GetModelsReply:
+#     models_info: List[Any]
+#     def __init__(self, **entries):
+#         self.__dict__.update(entries)
 
 @dataclass
 class UploadResponse:
@@ -223,6 +242,18 @@ class UploadResponse:
 @dataclass
 class RunModelResponse:
     output: List[Tensor]
+
+class ModelInfo:
+    model_name: str
+    model_id: str
+
+    def __init__(self, model_name, model_id):
+        self.model_id = model_id
+        self.model_name = model_name
+
+@dataclass
+class GetModelsResponse:
+    models_info: List[ModelInfo]
 
 
 @dataclass
@@ -780,6 +811,21 @@ class BlindAiConnection(contextlib.AbstractContextManager):
         r = self._conn.post(f"{self._model_management_url}/drm-status", "")
         r.raise_for_status()
         return r
+    
+    def get_available_models(self):
+        r = self._conn.get(f"{self._attested_url}/request-models")
+        r.raise_for_status()
+        get_models_reply = GetModelsReply(**cbor.loads(r.content))
+        print(get_models_reply)
+        ret = GetModelsResponse(
+            models_info=[
+                ModelInfo(model_info["model_name"], model_info['model_id']) 
+                for model_info in get_models_reply.models_info
+            ]
+        )
+        # print(ret.models_info[0].model_id)
+        return ret
+
 
     def close(self):
         self._conn.close()
