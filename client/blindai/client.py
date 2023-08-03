@@ -816,7 +816,6 @@ class BlindAiConnection(contextlib.AbstractContextManager):
         r = self._conn.get(f"{self._attested_url}/request-models")
         r.raise_for_status()
         get_models_reply = GetModelsReply(**cbor.loads(r.content))
-        print(get_models_reply)
         ret = GetModelsResponse(
             models_info=[
                 ModelInfo(model_info["model_name"], model_info['model_id']) 
