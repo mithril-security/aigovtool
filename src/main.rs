@@ -164,6 +164,18 @@ fn request_model_consumed(ip: &str, port: &str, arc_tls_config: &Arc<rustls::Cli
 
 }
 
+fn request_inferences_left(ip: &str, port: &str, arc_tls_config: &Arc<rustls::ClientConfig>) -> Result<InferencesTracking> {
+    let agent = ureq::builder()
+    .tls_config(arc_tls_config.clone())
+    .resolver(fixed_resolver::FixedResolver(format!("{ip}:{port}").parse().unwrap()))
+    .build();
+    
+    let response = agent.get(&format!("{DRM_ADDRESS}/request_consumption"))
+    .call()?
+    .into_json()?;
+
+    Ok(response)
+}
 
 
 // ----------------------------------------------------------------
@@ -328,9 +340,10 @@ fn main() -> Result<()> {
 
     #[derive(Serialize)]
     struct DrmStatus {
-        status: String,
+        outputs: String,
     }
     let tls_config = Arc::new(tls_config);
+    
     let router_management = {
         let arc_tls_config_clone = Arc::clone(&tls_config);
         move |request: &rouille::Request| {
@@ -354,7 +367,7 @@ fn main() -> Result<()> {
 
                 let request_consumption = request_consumption(3, DRM_IP, DRM_PORT, &arc_tls_config_clone);
                 println!("Consumption requested : {:?}", request_consumption);
-                rouille::Response::json(&DrmStatus {status : "status up received by the Inference server.".to_string()})
+                rouille::Response::json(&DrmStatus {outputs : "status up received by the Inference server.".to_string()})
             },
 
             _ => rouille::Response::empty_404()
@@ -399,7 +412,9 @@ fn main() -> Result<()> {
                     EXCHANGER.respond(request, reply)
                 } 
                 else {
-                    rouille::Response::json(&DrmStatus {status : "No inferences left available.".to_string()})
+                    let drm_status = DrmStatus {outputs : "No inferences left available.".to_string()};
+                    EXCHANGER.respond(request, Ok(drm_status))
+                    // rouille::Response::json(&DrmStatus {status : "No inferences left available.".to_string()})
                 }
             },
             (GET) (/request-models) => {
@@ -408,6 +423,11 @@ fn main() -> Result<()> {
                 EXCHANGER.respond(request, reply)
 
             }, 
+            (GET) (/inferences-left) => {
+                println!("Requesting the number of inferences left.");
+                let inference_left = request_inferences_left(DRM_IP, DRM_PORT, &arc_tls_config_clone).unwrap();
+                rouille::Response::json(&inference_left)
+            },
             _ => rouille::Response::empty_404()
         )
         }

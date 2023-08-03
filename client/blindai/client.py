@@ -820,7 +820,11 @@ class BlindAiConnection(contextlib.AbstractContextManager):
         # print(ret.models_info[0].model_id)
         return ret
 
-
+    def get_available_inferences(self):
+        r = self._conn.get(f"{self._attested_url}/inferences-left")
+        r.raise_for_status()
+        return r
+    
     def close(self):
         self._conn.close()
 
