@@ -38,11 +38,11 @@ def start(address):
     inferences_left = inferences_left.content.decode("utf-8")
     inferences_left = json.loads(inferences_left)
     click.echo(f'The number of inferences left is {inferences_left["inferences"]}')
-    while int(inferences_left["inferences"]) >1:
+    while int(inferences_left["inferences"]) >0:
         inferences_left = client_v2.get_available_inferences()
         inferences_left = inferences_left.content.decode("utf-8")
         inferences_left = json.loads(inferences_left)
-        if int(inferences_left["inferences"]) >1 :
+        if int(inferences_left["inferences"]) >0 :
             confirm_run = click.prompt("Run the model ? (Y/n)")
             if confirm_run == "Y":
                 input_tensors={"input": np.array(42), "sub": np.array(40)}
