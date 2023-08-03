@@ -2,15 +2,11 @@ import click
 import threading
 import queue 
 from blindai.core import *
-from drm import drm_server, enclave_counter
+from drm import drm_server
 
 
 
 def run_server(out_remote_attestation_status, in_server_status):
-
-    app = drm_server()
-    in_server_status.put("up")
-    app.run(host="0.0.0.0", port="6000", ssl_context=('./localhost.crt', './localhost.key'))
     remote_attestation_status = False
     while not remote_attestation_status:
         data = out_remote_attestation_status.get()
@@ -18,7 +14,9 @@ def run_server(out_remote_attestation_status, in_server_status):
             remote_attestation_status = True
     click.echo("Connected and model uploaded.")
     click.echo("starting the DRM server...")
-
+    app = drm_server()
+    in_server_status.put("up")
+    app.run(host="0.0.0.0", port="6000", ssl_context=('./localhost.crt', './localhost.key'))
     
 
 def connect_inference(address, upload, in_remote_attestation_status, out_server_status):

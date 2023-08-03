@@ -2,8 +2,6 @@ from flask import Flask, request, jsonify
 import json
 
 
-enclave_counter = 0
-
 # DRM server, goals: 
 #   - listening requests from the Inference Server for comsuption budget
 #   - sending each inference for tracing
@@ -50,13 +48,5 @@ def drm_server():
             return jsonify({"inferences": str(number_inferences)})
         else:
             return {"error" : "Method not allowed"}
-        
-    @app.route('enclave_discovery', method=['GET'])
-    def enclave_discovery():
-        if request.method == 'GET':
-            global enclave_counter
-            enclave_counter +=1 
-            print("* [GET: /enclave_discovery] BlindAI server tries to connect. Beginning the secure connection procedure.")
-            return {'DRM-server' : "connection approved."}
 
     return app
