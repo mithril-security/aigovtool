@@ -227,11 +227,6 @@ class GetModelsReply:
     def __init__(self, **entries):
         self.__dict__.update(entries)
 
-# @dataclass
-# class GetModelsReply:
-#     models_info: List[Any]
-#     def __init__(self, **entries):
-#         self.__dict__.update(entries)
 
 @dataclass
 class UploadResponse:
