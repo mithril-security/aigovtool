@@ -17,7 +17,12 @@ def run_server(out_remote_attestation_status, in_server_status):
     app = drm_server()
     in_server_status.put("up")
     app.run(host="0.0.0.0", port="6000", ssl_context=('./localhost.crt', './localhost.key'))
-    
+
+# def run_server_mod(in_server_status):
+#     app =drm_server()
+#     in_server_status.put("up")
+#     app.run(host="0.0.0.0", port="6000", ssl_context=('./localhost.crt', './localhost.key'))
+#     state = app.enclave_ready()
 
 def connect_inference(address, upload, in_remote_attestation_status, out_server_status):
     click.echo("Connecting to the Inference Server...") 

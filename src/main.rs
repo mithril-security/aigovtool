@@ -315,21 +315,21 @@ fn main() -> Result<()> {
 
     let (_unattested_handle, _unattested_sender) = unattested_server.stoppable();
     // set up connection to the DRM 
-    /**
+    /*
      * IN DEVELOPMENT : 
         DANGEROUS: All what is written here MUST be changed for production modes. 
         It is only to demonstrate that we can establish connection with a known DRM
         server for consumption tracking
-    **/
+    */
     let mut root_store = rustls::RootCertStore::empty();
-    let mut drm_certificate_pem = parse(DRM_CERT).unwrap(); 
-    let mut root_ca_pem = parse(DRM_ROOT_CA).unwrap();
+    let  drm_certificate_pem = parse(DRM_CERT).unwrap(); 
+    let root_ca_pem = parse(DRM_ROOT_CA).unwrap();
     // let mut drm_certificate_der = pem_to_der(drm_certificate_pem).expect("X.509: decoding DER failed");
-    let mut drm_certificate_der = parse_x509_certificate(&drm_certificate_pem.contents()).unwrap();
-    let mut root_ca_der = parse_x509_certificate(&root_ca_pem.contents()).unwrap();
+    let drm_certificate_der = parse_x509_certificate(&drm_certificate_pem.contents()).unwrap();
+    // let mut root_ca_der = parse_x509_certificate(&root_ca_pem.contents()).unwrap();
     println!("X.509 DRM certificate : {:?}", drm_certificate_der);
-    let mut drm_certificate = drm_certificate_pem.contents().to_vec();
-    let mut root_certificate = root_ca_pem.contents().to_vec();
+    let drm_certificate = drm_certificate_pem.contents().to_vec();
+    let root_certificate = root_ca_pem.contents().to_vec();
     root_store.add_parsable_certificates(&[root_certificate]);
     root_store.add_parsable_certificates(&[drm_certificate]);
 

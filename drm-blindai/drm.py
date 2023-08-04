@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import json
 
 
+
 # DRM server, goals: 
 #   - listening requests from the Inference Server for comsuption budget
 #   - sending each inference for tracing
@@ -48,5 +49,14 @@ def drm_server():
             return jsonify({"inferences": str(number_inferences)})
         else:
             return {"error" : "Method not allowed"}
+        
+    @app.route('/enclave_ready', methods=['GET'])
+    def enclave_ready():
+        if request.method == "GET":
+            return {"state" : "enclave request Ready"}
+        else:
+            return {"error" : "Method not allowed"}
+
+
 
     return app
