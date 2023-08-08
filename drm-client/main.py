@@ -39,6 +39,7 @@ def start(address):
     inferences_left = json.loads(inferences_left)
     click.echo(f'The number of inferences left is {inferences_left["inferences"]}')
     while int(inferences_left["inferences"]) >0:
+        print(inferences_left)
         inferences_left = client_v2.get_available_inferences()
         inferences_left = inferences_left.content.decode("utf-8")
         inferences_left = json.loads(inferences_left)

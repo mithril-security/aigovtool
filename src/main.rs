@@ -453,6 +453,8 @@ fn main() -> Result<()> {
 
     println!("BlindAI server is running on the ports 9923 and 9924 for run and 9925 for management");
 
+
+
     // Emit the telemetry `Started` event
     telemetry::add_event(telemetry::TelemetryEventProps::Started {}, None, None);
     _unattested_handle.join().unwrap();
