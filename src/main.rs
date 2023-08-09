@@ -363,9 +363,9 @@ fn main() -> Result<()> {
 
             (POST) (/drm-status) => {
                 println!("DRM Server running and connected.");
-                println!("Requesting 1000 Inferences.");
+                println!("Requesting 5 Inferences.");
 
-                let request_consumption = request_consumption(3, DRM_IP, DRM_PORT, &arc_tls_config_clone);
+                let request_consumption = request_consumption(5, DRM_IP, DRM_PORT, &arc_tls_config_clone);
                 println!("Consumption requested : {:?}", request_consumption);
                 rouille::Response::json(&DrmStatus {outputs : "status up received by the Inference server.".to_string()})
             },
@@ -404,16 +404,24 @@ fn main() -> Result<()> {
             (POST) (/run) => {
                 // TODO: add condition to verify the drm number of requests
                 println!("Running model. Verifying the number of inferences left.");
-                let consume_model = request_model_consumed(DRM_IP, DRM_PORT, &arc_tls_config_clone).unwrap();
-                println!("/run ; {:?}", consume_model.inferences.parse::<u32>().unwrap());
+                let inference_left = request_inferences_left(DRM_IP, DRM_PORT, &arc_tls_config_clone).unwrap();
+                println!("/run ; {:?}", inference_left.inferences.parse::<u32>().unwrap());
 
-                if consume_model.inferences.parse::<u32>().unwrap() > 0 {
+                if inference_left.inferences.parse::<u32>().unwrap() > 0 {
+                    let _ = request_model_consumed(DRM_IP, DRM_PORT, &arc_tls_config_clone).unwrap();
                     let reply = EXCHANGER.run_model(request);
                     EXCHANGER.respond(request, reply)
                 } 
                 else {
-                    let drm_status = DrmStatus {outputs : "No inferences left available.".to_string()};
-                    EXCHANGER.respond(request, Ok(drm_status))
+                    // let drm_status = DrmStatus {outputs : "No inferences left available.".to_string()};
+                    println!("No inferences available left. Requesting new number of inferences.");
+
+                    println!("Requesting 5 Inferences.");
+
+                    let request_consumption = request_consumption(6, DRM_IP, DRM_PORT, &arc_tls_config_clone);
+                    println!("Consumption requested : {:?}", request_consumption);
+                    let reply = EXCHANGER.run_model(request);
+                    EXCHANGER.respond(request, reply)
                     // rouille::Response::json(&DrmStatus {status : "No inferences left available.".to_string()})
                 }
             },
