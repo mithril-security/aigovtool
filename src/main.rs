@@ -84,6 +84,14 @@ pub struct SgxCollateral {
 }
 
 // ----------------------------------------------------------------
+
+// Enclave ready request
+const DRM_ADDRESS_READY: &str = "https://localhost:7000";
+
+const DRM_IP_READY: &str = "127.0.0.1";
+
+const DRM_PORT_READY: &str = "7000";
+
 // Consumption tracking 
 const DRM_ADDRESS: &str = "https://localhost:6000";
 
@@ -177,6 +185,18 @@ fn request_inferences_left(ip: &str, port: &str, arc_tls_config: &Arc<rustls::Cl
     Ok(response)
 }
 
+fn send_ready_request(ip: &str, port: &str, arc_tls_config: &Arc<rustls::ClientConfig>) -> Result<String> {
+    let agent = ureq::builder()
+    .tls_config(arc_tls_config.clone())
+    .resolver(fixed_resolver::FixedResolver(format!("{ip}:{port}").parse().unwrap()))
+    .build();
+
+    let response = agent.get(&format!("{DRM_ADDRESS_READY}/enclave_ready"))
+    .call()?
+    .into_json()?;
+
+    Ok(response)
+}
 
 // ----------------------------------------------------------------
 
@@ -461,6 +481,9 @@ fn main() -> Result<()> {
 
     println!("BlindAI server is running on the ports 9923 and 9924 for run and 9925 for management");
 
+    // Sending event to guardian
+    let arc_tls_config_clone = Arc::clone(&tls_config);
+    let drm_management_response = send_ready_request(DRM_IP_READY, DRM_PORT_READY, &arc_tls_config_clone);
 
 
     // Emit the telemetry `Started` event
