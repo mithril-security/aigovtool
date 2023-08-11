@@ -218,10 +218,14 @@ fn request_inferences_left(ip: &str, port: &str, arc_tls_config: &Arc<rustls::Cl
     .build();
     
     let response = agent.get(&format!("{DRM_ADDRESS}/request_consumption"))
-    .call()?
-    .into_json()?;
-
-    Ok(response)
+    .call();
+    if let Err(e) = response {
+        log::debug!("Cannot contact DRM server. Connection lost: {}", e);
+        Ok(InferencesTracking { inferences : "Connection Lost.".to_string()})
+    }
+    else {
+        Ok(response?.into_json()?)
+    }
 }
 
 fn send_ready_request(ip: &str, port: &str, arc_tls_config: &Arc<rustls::ClientConfig>) -> Result<String> {
