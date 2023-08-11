@@ -767,17 +767,21 @@ class BlindAiConnection(contextlib.AbstractContextManager):
             client_info=self.client_info.__dict__,
         )
         bytes_run_data = cbor.dumps(run_data.__dict__)
-        r = self._conn.post(f"{self._attested_url}/run", data=bytes_run_data)
-        r.raise_for_status()
-        run_model_reply = RunModelReply(**cbor.loads(r.content))
+        try:
+            r = self._conn.post(f"{self._attested_url}/run", data=bytes_run_data)
+            r.raise_for_status()
+            run_model_reply = RunModelReply(**cbor.loads(r.content))
 
-        ret = RunModelResponse(
+            ret = RunModelResponse(
             output=[
                 Tensor(TensorInfo(**output["info"]), output["bytes_data"])
                 for output in run_model_reply.outputs
             ]
         )
-        return ret
+            return ret
+        except requests.exceptions.HTTPError as err:
+            raise SystemExit("DRM server connection lost.")
+
 
     def delete_model(self, model_id: str):
         """Delete a model in the inference server.
@@ -821,9 +825,12 @@ class BlindAiConnection(contextlib.AbstractContextManager):
         return ret
 
     def get_available_inferences(self):
-        r = self._conn.get(f"{self._attested_url}/inferences-left")
-        r.raise_for_status()
-        return r
+        try:
+            r = self._conn.get(f"{self._attested_url}/inferences-left")
+            r.raise_for_status()
+            return r
+        except requests.exceptions.HTTPError as err:
+            raise SystemExit("DRM server connection lost.")
     
     def close(self):
         self._conn.close()

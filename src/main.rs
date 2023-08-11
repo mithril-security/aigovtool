@@ -18,10 +18,13 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::thread;
+use std::result::Result::Ok;
 mod identity;
 mod model;
 mod model_store;
 use crate::client_communication::Exchanger;
+use anyhow::Error;
+// use anyhow::Ok;
 use anyhow::Result;
 use model_store::ModelStore;
 mod client_communication;
@@ -29,7 +32,9 @@ use lazy_static::lazy_static;
 use log::debug;
 mod telemetry;
 mod ureq_dns_resolver;
+use rouille::Response;
 use telemetry::Telemetry;
+use ureq::OrAnyStatus;
 use crate::ureq_dns_resolver::InternalAgent;
 use crate::ureq_dns_resolver::fixed_resolver;
 
@@ -154,10 +159,24 @@ fn request_consumption(inference_number: u32, ip: &str, port: &str, arc_tls_conf
         .tls_config(arc_tls_config.clone())
         .resolver(fixed_resolver::FixedResolver(format!("{ip}:{port}").parse().unwrap()))
         .build();
-    let response = agent.post(&format!("{DRM_ADDRESS}/request_consumption"))
-        .send_form(&[("number_inferences", inference_req)])?
-        .into_json()?;
-    Ok(response)
+    // let response = agent.post(&format!("{DRM_ADDRESS}/request_consumption"))
+    //     .send_form(&[("number_inferences", inference_req)])?;
+    match agent.post(&format!("{DRM_ADDRESS}/request_consumption"))
+    .send_form(&[("number_inferences", inference_req)]) {
+        Ok(response) => {
+            let content_response = response.into_json()?; 
+            Ok(content_response)
+        }, 
+        Err(_) => {
+            println!("The DRM server isn't responsive any longer/Disconnected.");
+            Ok(InferencesTracking { inferences : "Connection Lost.".to_string()})
+        }
+        // Err(_) => {
+        //     println!("The DRM server isn't responsive any longer/Disconnected.");
+        //     Ok(InferencesTracking { inferences : "I/O transport error.".to_string()})
+        // }
+    }
+
 }
 
 fn request_model_consumed(ip: &str, port: &str, arc_tls_config: &Arc<rustls::ClientConfig>) -> Result<InferencesTracking> {
@@ -166,11 +185,31 @@ fn request_model_consumed(ip: &str, port: &str, arc_tls_config: &Arc<rustls::Cli
         .resolver(fixed_resolver::FixedResolver(format!("{ip}:{port}").parse().unwrap()))
         .build();
     let response = agent.post(&format!("{DRM_ADDRESS}/consume_model"))
-        .send_form(&[("run_model", "requested by X")])?
-        .into_json()?;
-    Ok(response)
+        .send_form(&[("run_model", "requested")]);
+    if let Err(e) = response {
+        log::debug!("Cannot contact DRM server: {}", e);
+        Ok(InferencesTracking { inferences : "Connection Lost.".to_string()})
+    }
+    else {
+        Ok(response?.into_json()?)
+    }
 
+    // match agent.post(&format!("{DRM_ADDRESS}/consume_model"))
+    // .send_form(&[("run_model", "requested")]) {
+    //     Ok(response) => {
+    //         let content_response = response.into_json()?; 
+    //         Ok(content_response)
+    //     },
+    //     Err(ureq::Error::Status(500, response)) => {
+    //         println!("The DRM server isn't responsive any longer/Disconnected.");
+    //         Ok(InferencesTracking { inferences : "Connection Lost.".to_string()})
+    //     },
+    //     Err(_) => {
+    //         println!("The DRM server isn't responsive any longer/Disconnected.");
+    //         Ok(InferencesTracking { inferences : "Connection Lost.".to_string()})
+    //     }
 }
+    
 
 fn request_inferences_left(ip: &str, port: &str, arc_tls_config: &Arc<rustls::ClientConfig>) -> Result<InferencesTracking> {
     let agent = ureq::builder()
