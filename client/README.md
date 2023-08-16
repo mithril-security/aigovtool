@@ -1,10 +1,5 @@
 <a name="readme-top"></a>
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![Apache License][license-shield]][license-url]
 
 
 <!-- PROJECT LOGO -->
@@ -14,14 +9,15 @@
     <img src="https://github.com/mithril-security/blindai/raw/main/docs/assets/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h1 align="center">BlindAI</h1>
+<h1 align="center">BlindAI DRM Proof-Of-Concept</h1>
 
 [![Website][website-shield]][website-url]
 [![Blog][blog-shield]][blog-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
   <p align="center">
-    <b>BlindAI</b> is an <b>AI privacy solution</b>, allowing users to query popular AI models or serve their own models whilst ensuring that users' data remains private every step of the way.
+    <b>BlindAI DRM Proof-Of-Concept</b> is an <b>AI privacy solution</b>, allowing users to query popular AI models or serve their own models whilst ensuring that users' data remains private every step of the way.
+    It includes the code for a DRM server/client that verifies the number of inferences. 
 	<br /><br />
     <a href="https://blindai.mithrilsecurity.io/en/latest"><strong>Explore the docs »</strong></a>
     <br />
@@ -47,11 +43,7 @@
       </ul>
     </li>
     <li>
-      <a href="#-getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#blindai-api">BlindAI API</a></li>
-        <li><a href="#blindai-core">BlindAI Core</a></li>
-      </ul>
+      <a href="#-Set-up">Set up</a>
     </li>
     <li><a href="#-usage">Usage</a></li>
     <li><a href="#-getting-help">Getting Help</a></li>
@@ -63,14 +55,9 @@
 <!-- ABOUT THE PROJECT -->
 ## 🔒 About The Project
 
-**BlindAI** is an **open-source solution** to query and deploy AI models while **guaranteeing data privacy**. The querying of models is done via our **easy-to-use Python library**.
+**BlindAI DRM POC** is an to query and deploy AI models while **guaranteeing data privacy**. It includes a DRM Server and client to monitor inference consumption of a particular model.
 
-Data sent by users to the AI model is kept **confidential at all times** by hardware-enforced **Trusted Execution Environments**. We explain how they keep data and models safe in detail [here](https://blindai.mithrilsecurity.io/en/latest/docs/getting-started/confidential_computing/).
 
-There are two main scenarios for BlindAI:
-
-- **BlindAI API**: Using BlindAI to query popular AI models hosted by Mithril Security.
-- **BlindAI Core**: Using BlindAI's underlying technology to host your own BlindAI server instance to securely deploy your own models.
 
 You can find our more about BlindAI API and BlindAI Core [here](https://blindai.mithrilsecurity.io/en/latest/docs/getting-started/blindai_structure/).
 
@@ -81,58 +68,45 @@ You can find our more about BlindAI API and BlindAI Core [here](https://blindai.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
-## 🚀 Getting Started
+## Set up
 
-We strongly recommend for you to get started with our [Quick tour](https://blindai.mithrilsecurity.io/en/latest/docs/getting-started/quick-tour/) to discover BlindAI with the open-source model Whisper.
+You can visit the blindai repo and documentation that explains how to set up blindAI [here](https://blindai.mithrilsecurity.io/en/latest/).
 
-But here’s a taste of what using BlindAI could look like 🍒
 
-### BlindAI API
-
-```py
-transcript = blindai.api.Audio.transcribe(
-    file="patient_104678.wav"
-)
-print(transcript)
-
-The patient is a 55-year old male with known coronary artery disease.
-```
-
-### BlindAI.Core
-
-#### AI company's side: uploading and deleting models
-
-An AI company AI company want to provide their model as an an easy-to-use service. They upload it to the server, which is assigned a model ID.
-
-```py
-response = client_1.upload_model(model="./COVID-Net-CXR-2.onnx")
-MODEL_ID = response.model_id
-print(MODEL_ID)
-
-8afcdab8-209e-4b93-9403-f3ea2dc0c3ae
-```
-
-When collaborating with clients is done, the AI company can delete their model from the server.
-
-```py
-# AI company deletes model after use
-client_1.delete_model(MODEL_ID)
-```
-
-#### Client's side: running a model on confidential data
-
-The client wants to feed their confidential data to the model while protecting it from third-party access. They connect and run the model on the following confidential image.
-
-![](https://github.com/mithril-security/blindai/blob/main/docs/assets/positive_image.png)
-
-```py
-pos_ret = client_2.run_model(MODEL_ID, positive)
-print("Probability of Covid for positive image is", pos_ret.output[0].as_flat()[0][1])
-
-Probability of Covid for positive image is 0.890598714351654
-```
 
 _For more examples, please refer to the [Documentation](https://blindai.mithrilsecurity.io/en/latest/)_
+
+## Usage
+Open 3 terminals.
+(Either through VSCode or powershell)
+
+![terminals](../docs/assets/fli_1.png)
+
+On the **custodian** run the following commands: [in red]
+```
+$ cd client && poetry shell
+$ cd ../drm-blindai && python3 main.py --address=127.0.0.1 --upload=../tests/simple/simple.onnx
+```
+
+The second line will run the DRM server and wait for the enclave to be ready.
+	
+
+on the **Enclave** : [in green] 
+	run the enclave and blindai by typing : 
+```
+$ just run 
+```
+A few seconds are required for the app to run and should connect to the DRM server. 
+	
+On the **customer** : [in blue]
+
+```
+$ cd client && poetry shell
+$ cd ../drm-client && python3 main.py --address=127.0.0.1
+```
+
+
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
