@@ -80,7 +80,7 @@ _For more examples, please refer to the [Documentation](https://blindai.mithrils
 Open 3 terminals.
 (Either through VSCode or powershell)
 
-![terminals](../docs/assets/fli_1.png)
+![terminals](https://github.com/mithril-security/blindai_drm_fli/blob/main/docs/assets/fli_1.png)
 
 On the **custodian** run the following commands: [in red]
 ```
