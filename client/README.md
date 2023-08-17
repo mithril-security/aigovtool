@@ -55,7 +55,7 @@
 <!-- ABOUT THE PROJECT -->
 ## 🔒 About The Project
 
-**BlindAI DRM POC** is an to query and deploy AI models while **guaranteeing data privacy**. It includes a DRM Server and client to monitor inference consumption of a particular model.
+**BlindAI DRM POC** is an Open-Source solution to query and deploy AI models while **guaranteeing data privacy**. It includes a DRM Server and client to monitor inference consumption of a particular model.
 
 
 
