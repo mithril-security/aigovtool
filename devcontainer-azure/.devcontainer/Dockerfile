@@ -62,7 +62,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash 
 
 # Add poetry and python dev utilities
 RUN apt-get install -y python3-dev python3-distutils python3-pip \
-    && sudo -u "vscode" zsh -c "\
+    && sudo -u $USER zsh -c "\
     curl -sSL https://install.python-poetry.org | python3 - \
     && mkdir ~/.oh-my-zsh/custom/plugins/poetry \
     && export PATH=${POETRY_HOME}:$PATH \
