@@ -70,7 +70,56 @@ You can find our more about BlindAI API and BlindAI Core [here](https://blindai.
 <!-- GETTING STARTED -->
 ## Set up
 
-You can visit the blindai repo and documentation that explains how to set up blindAI [here](https://blindai.mithrilsecurity.io/en/latest/).
+### Choosing the VM
+There is different VMs available on Azure for running confidential computing applications. 
+
+As we are working oon intel SGX, we are going to choose the DCs v3 family that supports Intel SGX (and more precisely SGX 2). To have enough memory to run our models, we choose the 64gb memory with 8-vcpus.
+![Azure VM](../docs/assets/set_up.png)
+
+After the creation of the instance, we can connect to it via SSH. The command and methods are usually explained at the  connect section tab.
+
+### Setting up Intel SGX and the needed dependencies 
+After connecting to the instance via SSH you can run the following the commands to install SGX, rust, and all the configuration needed to run our BlindAI secure enclave. 
+
+- Usual dependencies
+```bash 
+sudo apt-get install -y libcurl4 libssl1.1 make cmake jq pkg-config libssl-dev protobuf-compiler curl gnupg software-properties-common
+```
+
+- Rust and its set-up
+```bash
+# install rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Changing default to nightly
+rustup default nightly
+rustup target add x86_64-fortanix-unknown-sgx --toolchain nightly
+```
+
+- Installing intel SGX dependencies and fortanix
+```bash
+# Intel SGX 
+echo "deb https://download.01.org/intel-sgx/sgx_repo/ubuntu $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list.d/intel-sgx.list >/dev/null 
+
+curl -sSL "https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key" | sudo apt-key add - 
+
+sudo apt-get update
+
+sudo apt-get install -y sgx-aesm-service libsgx-aesm-launch-plugin
+
+# Fortanix & Just
+cargo install fortanix-sgx-tools ftxsgx-simulator sgxs-tools --git https://github.com/mithril-security/rust-sgx --branch sim-mode
+
+curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | sudo bash -s -- --to /usr/bin
+
+# Azure DCAP client
+sudo apt-get remove -y libsgx-dcap-default-qpl 
+curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+sudo add-apt-repository "https://packages.microsoft.com/ubuntu/20.04/prod"
+sudo apt-get update && sudo apt-get install -y az-dcap-client
+sudo ln -s /usr/lib/libdcap_quoteprov.so /usr/lib/x86_64-linux-gnu/libdcap_quoteprov.so.1
+```
+  At this point, everything related to Intel SGX has been installed. Let's add some packages related to running the client and the DRM. 
 
 
 
