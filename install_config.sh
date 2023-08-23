@@ -14,3 +14,13 @@ cargo install fortanix-sgx-tools ftxsgx-simulator sgxs-tools --git https://githu
 
 export BLINDAI_AZURE_DCSV3_PATCH=1
 export SGX_AESM_ADDR=1
+
+# poetry installation
+curl -sSL https://install.python-poetry.org | python3 -
+
+git submodule init
+git submodule update
+
+
+
+

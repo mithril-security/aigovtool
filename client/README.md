@@ -79,9 +79,28 @@ As we are working oon intel SGX, we are going to choose the DCs v3 family that s
 After the creation of the instance, we can connect to it via SSH. The command and methods are usually explained at the  connect section tab.
 
 ### Setting up Intel SGX and the needed dependencies 
-After connecting to the instance via SSH you can run the following the commands to install SGX, rust, and all the configuration needed to run our BlindAI secure enclave. 
+After connecting to the instance via SSH you can run the following scripts to install SGX, rust, and all the configuration needed to run our BlindAI secure enclave. 
 
-- Usual dependencies
+We begin by cloning the BlindAI DRM repo via github :
+```bash
+$ git clone https://github.com/mithril-security/blindai_drm_fli.git
+$ cd blindai_drm_fli/
+```
+
+- The first script installs all the dependencies needed for SGX and remote attestation to work perfectly, this one should be ran as root : 
+```bash 
+$ sudo ./install_packages.sh
+``` 
+
+- Then, run the following script in normal user to finish the intallation configuration.
+```bash
+$ ./install_config.sh
+```
+
+After this point, a reboot is necessary so that SGX works. You can directly reboot the instance from the Azure portal. 
+
+
+<!-- - Usual dependencies
 ```bash 
 sudo apt-get install -y libcurl4 libssl1.1 make cmake jq pkg-config libssl-dev protobuf-compiler curl gnupg software-properties-common
 ```
@@ -118,14 +137,19 @@ curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 sudo add-apt-repository "https://packages.microsoft.com/ubuntu/20.04/prod"
 sudo apt-get update && sudo apt-get install -y az-dcap-client
 sudo ln -s /usr/lib/libdcap_quoteprov.so /usr/lib/x86_64-linux-gnu/libdcap_quoteprov.so.1
-```
-  At this point, everything related to Intel SGX has been installed. Let's add some packages related to running the client and the DRM. 
+``` -->
+At this point, everything related to Intel SGX has been installed. 
 
+Lastly, we need to install the blindAI client so that it can be used on the DRM. 
+```bash
+$ cd client/ && poetry shell
+$ poetry install
+``` 
+And the blindAI should install on the poetry environment
 
+_For more examples on the BlindAI project, you can refer to the [Documentation](https://blindai.mithrilsecurity.io/en/latest/)_
 
-_For more examples, please refer to the [Documentation](https://blindai.mithrilsecurity.io/en/latest/)_
-
-## Usage
+## Demo
 Open 3 terminals.
 (Either through VSCode or powershell)
 
@@ -143,7 +167,7 @@ The second line will run the DRM server and wait for the enclave to be ready.
 on the **Enclave** : [in green] 
 	run the enclave and blindai by typing : 
 ```
-$ just run 
+$ BLINDAI_AZURE_DCS3_PATCH=1 just run 
 ```
 A few seconds are required for the app to run and should connect to the DRM server. 
 	
