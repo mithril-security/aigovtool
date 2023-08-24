@@ -18,6 +18,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::thread;
+use std::time::Duration;
 use std::result::Result::Ok;
 mod identity;
 mod model;
@@ -161,12 +162,21 @@ fn request_consumption(inference_number: u32, ip: &str, port: &str, arc_tls_conf
         .build();
     // let response = agent.post(&format!("{DRM_ADDRESS}/request_consumption"))
     //     .send_form(&[("number_inferences", inference_req)])?;
+    thread::sleep(Duration::from_secs(2));
     match agent.post(&format!("{DRM_ADDRESS}/request_consumption"))
     .send_form(&[("number_inferences", inference_req)]) {
         Ok(response) => {
             let content_response = response.into_json()?; 
             Ok(content_response)
         }, 
+        Err(ureq::Error::Status(500, response)) | Err(ureq::Error::Status(502, response) 
+        | ureq::Error::Status(404, response)) => {
+            let retry: Option<u64> = response.header("retry-after").and_then(|h| h.parse().ok());
+            let retry = retry.unwrap_or(5);
+            eprintln!("{} for {}, retry in {}", response.status(), response.get_url(), retry);
+            thread::sleep(Duration::from_secs(retry));
+            Ok(InferencesTracking { inferences : "Connection Retry.".to_string()})
+        },
         Err(_) => {
             println!("The DRM server isn't responsive any longer/Disconnected.");
             Ok(InferencesTracking { inferences : "Connection Lost.".to_string()})
