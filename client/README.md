@@ -74,7 +74,7 @@ You can find our more about BlindAI API and BlindAI Core [here](https://blindai.
 There is different VMs available on Azure for running confidential computing applications. 
 
 As we are working oon intel SGX, we are going to choose the DCs v3 family that supports Intel SGX (and more precisely SGX 2). To have enough memory to run our models, we choose the 64gb memory with 8-vcpus.
-![Azure VM](../docs/assets/set_up.png)
+![Azure VM](https://github.com/mithril-security/blindai_drm_fli/blob/main/docs/assets/set_up.png)
 
 After the creation of the instance, we can connect to it via SSH. The command and methods are usually explained at the  connect section tab.
 
@@ -186,7 +186,7 @@ That you can download by entering the following command:
 ```bash
 $ wget https://github.com/pytorch/hub/raw/master/images/dog.jpg
 ```
-We can then supply it directly the the client:
+We can then supply it directly to the client:
 
 ```bash
 $ cd client && poetry shell
