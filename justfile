@@ -51,9 +51,9 @@ build *args:
     | jq -r 'select(.reason=="compiler-artifact" and .target.kind==["bin"]) | .executable'` 
     
   ftxsgx-elf2sgxs "$binpath" \
-    --heap-size 0x2FBA00000 \
+    --heap-size 0xF00000000 \
     --ssaframesize 1 \
-    --stack-size 0x20000 \
+    --stack-size 0x400000 \
     --threads 32
 
   just generate-manifest-dev "$binpath.sgxs" 

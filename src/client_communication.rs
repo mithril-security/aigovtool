@@ -70,7 +70,7 @@ struct UploadModel {
     client_info: ClientInfo,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub(crate) struct SendModelReply {
     #[serde(with = "serde_bytes")]
     hash: Vec<u8>,
@@ -178,7 +178,7 @@ impl Exchanger {
             model_name.clone(),
             upload_model_body.optimize,
         )?;
-
+        println!("Model ID : {:?}", model_id.to_string());
         // End the timer for the telemetry event
         let elapsed = start_time.elapsed();
 

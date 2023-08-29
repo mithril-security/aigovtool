@@ -203,21 +203,6 @@ fn request_model_consumed(ip: &str, port: &str, arc_tls_config: &Arc<rustls::Cli
     else {
         Ok(response?.into_json()?)
     }
-
-    // match agent.post(&format!("{DRM_ADDRESS}/consume_model"))
-    // .send_form(&[("run_model", "requested")]) {
-    //     Ok(response) => {
-    //         let content_response = response.into_json()?; 
-    //         Ok(content_response)
-    //     },
-    //     Err(ureq::Error::Status(500, response)) => {
-    //         println!("The DRM server isn't responsive any longer/Disconnected.");
-    //         Ok(InferencesTracking { inferences : "Connection Lost.".to_string()})
-    //     },
-    //     Err(_) => {
-    //         println!("The DRM server isn't responsive any longer/Disconnected.");
-    //         Ok(InferencesTracking { inferences : "Connection Lost.".to_string()})
-    //     }
 }
     
 
@@ -425,7 +410,7 @@ fn main() -> Result<()> {
             (POST) (/upload) => {
                 let reply = EXCHANGER.send_model(request);
                 // add request handle to send the number of inferences needed
-
+                println!("reply is : {:?}", reply);
                 EXCHANGER.respond(request, reply)
             },
 

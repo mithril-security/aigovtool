@@ -2,6 +2,7 @@ import click
 import threading
 from flask import Flask, request, jsonify
 import queue 
+import time
 from blindai.core import *
 from drm import drm_server
 
@@ -31,6 +32,7 @@ def start_enclave_listener(address: str, upload: str):
 
 
 def run_server(out_remote_attestation_status, in_server_status):
+    time.sleep(2)
     remote_attestation_status = False
     while not remote_attestation_status:
         data = out_remote_attestation_status.get()
@@ -53,6 +55,7 @@ def connect_inference(address, upload, in_remote_attestation_status, out_server_
     client_v2 = connect(addr=address, hazmat_http_on_unattested_port=True) # TODO: error handling in case RA failed
     click.echo("Inference server remote attestation completed successfully.")
     click.echo(f"Sending the model {upload}...")
+    time.sleep(2)
     response = client_v2.upload_model(model=upload)
     click.echo(response)
     in_remote_attestation_status.put("success")

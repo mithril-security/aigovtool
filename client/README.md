@@ -150,15 +150,20 @@ And the blindAI should install on the poetry environment
 _For more examples on the BlindAI project, you can refer to the [Documentation](https://blindai.mithrilsecurity.io/en/latest/)_
 
 ## Demo
+
+In this quick demo, we are going to use the ResNet model. 
+You can download the resnet model chosen directly from the onnx repo here : [https://github.com/onnx/models/tree/main/vision/classification/resnet/model](). 
+The one that will be used on this demo is `resnet101-v2-7.onnx`.
+
 Open 3 terminals.
 (Either through VSCode or powershell)
 
 ![terminals](https://github.com/mithril-security/blindai_drm_fli/blob/main/docs/assets/fli_1.png)
 
 On the **custodian** run the following commands: [in red]
-```
+```bash
 $ cd client && poetry shell
-$ cd ../drm-blindai && python3 main.py --address=127.0.0.1 --upload=../tests/simple/simple.onnx
+$ cd ../drm-blindai && python3 main.py --address=127.0.0.1 --upload=resnet101-v2-7.onnx
 ```
 
 The second line will run the DRM server and wait for the enclave to be ready.
@@ -166,16 +171,26 @@ The second line will run the DRM server and wait for the enclave to be ready.
 
 on the **Enclave** : [in green] 
 	run the enclave and blindai by typing : 
-```
-$ BLINDAI_AZURE_DCS3_PATCH=1 just run 
+```bash
+$ BLINDAI_AZURE_DCS3_PATCH=1 just release 
 ```
 A few seconds are required for the app to run and should connect to the DRM server. 
 	
 On the **customer** : [in blue]
 
+Before running the client, we will need to supply an image that will be ran by the ResNet model. 
+We choose the following one for the example: 
+![dog.jpg](https://github.com/pytorch/hub/raw/master/images/dog.jpg)
+
+That you can download by entering the following command: 
+```bash
+$ wget https://github.com/pytorch/hub/raw/master/images/dog.jpg
 ```
+We can then supply it directly the the client:
+
+```bash
 $ cd client && poetry shell
-$ cd ../drm-client && python3 main.py --address=127.0.0.1
+$ cd ../drm-client && python3 main.py --address=127.0.0.1 --input=dog.jpg
 ```
 
 
