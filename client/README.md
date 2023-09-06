@@ -151,9 +151,13 @@ _For more examples on the BlindAI project, you can refer to the [Documentation](
 
 ## Demo
 
-In this quick demo, we are going to use the ResNet model. 
-You can download the resnet model chosen directly from the onnx repo here : [https://github.com/onnx/models/tree/main/vision/classification/resnet/model](). 
-The one that will be used on this demo is `resnet101-v2-7.onnx`.
+In this quick demo, we are going to use the COVIDNet model. 
+You can download the COVIDnet model by running the following command : 
+```bash
+wget --quiet --load-cookies /tmp/cookies.txt \"https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1Rzl_XpV_kBw-lzu_5xYpc8briFd7fjvc' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\\1\\n/p')&id=1Rzl_XpV_kBw-lzu_5xYpc8briFd7fjvc\" -O COVID-Net-CXR-2.onnx && rm -rf /tmp/cookies.txt"
+```
+
+The model downloaded will be named as `COVID-Net-CXR-2.onnx`.
 
 Open 3 terminals.
 (Either through VSCode or powershell)
@@ -163,7 +167,7 @@ Open 3 terminals.
 On the **custodian** run the following commands: [in red]
 ```bash
 $ cd client && poetry shell
-$ cd ../drm-blindai && python3 main.py --address=127.0.0.1 --upload=resnet101-v2-7.onnx
+$ cd ../drm-blindai && python3 main.py --address=127.0.0.1 --upload=COVID-Net-CXR-2.onnx
 ```
 
 The second line will run the DRM server and wait for the enclave to be ready.
@@ -178,19 +182,19 @@ A few seconds are required for the app to run and should connect to the DRM serv
 	
 On the **customer** : [in blue]
 
-Before running the client, we will need to supply an image that will be ran by the ResNet model. 
-We choose the following one for the example: 
-![dog.jpg](https://github.com/pytorch/hub/raw/master/images/dog.jpg)
+Before running the client, we will need to supply an image that will be ran by the CovidNet model. 
+Let's fetch the CXR image to send to the model: 
+![Image scan](https://raw.githubusercontent.com/lindawangg/COVID-Net/master/assets/ex-covid.jpeg)
 
-That you can download by entering the following command: 
 ```bash
-$ wget https://github.com/pytorch/hub/raw/master/images/dog.jpg
+!wget --quiet https://raw.githubusercontent.com/lindawangg/COVID-Net/master/assets/ex-covid.jpeg
 ```
+
 We can then supply it directly to the client:
 
 ```bash
 $ cd client && poetry shell
-$ cd ../drm-client && python3 main.py --address=127.0.0.1 --input=dog.jpg
+$ cd ../drm-client && python3 main.py --address=127.0.0.1 --input=ex-covid.jpeg
 ```
 
 

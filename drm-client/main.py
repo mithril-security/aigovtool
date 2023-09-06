@@ -7,7 +7,25 @@ from PIL import Image
 from matplotlib import pyplot as plt
 import requests
 import torch
+import cv2
 
+def crop_top(img, percent=0.15):
+    offset = int(img.shape[0] * percent)
+    return img[offset:]
+
+def central_crop(img):
+    size = min(img.shape[0], img.shape[1])
+    offset_h = int((img.shape[0] - size) / 2)
+    offset_w = int((img.shape[1] - size) / 2)
+    return img[offset_h:offset_h + size, offset_w:offset_w + size]
+
+def process_image_file(filepath, size, top_percent=0.08, crop=True):
+    img = cv2.imread(filepath)
+    img = crop_top(img, percent=top_percent)
+    if crop:
+        img = central_crop(img)
+    img = cv2.resize(img, (size, size))
+    return img
 # parses input to use it as a tensor
 def process_input(input_data):
     input_image = Image.open(input_data)
@@ -50,6 +68,9 @@ def process_predictions(prediction):
     # Get the probability- which is the highest probability from output
     print("Probability is:", probabilities.max().item())
 
+def process_predictions_covid(prediction):
+    print(f"Probability of COVID positivity: {prediction[0][1]}")
+
 def model_acquire(address):
     click.echo("Connecting to the blindAI server.")
     client_v2 = connect(addr=address, hazmat_http_on_unattested_port=True) # TODO: error handling in case RA failed
@@ -86,6 +107,9 @@ def start(address, input):
     inferences_left = inferences_left.content.decode("utf-8")
     inferences_left = json.loads(inferences_left)
     input_batch = process_input(input)
+    input_batch = process_image_file(input, size=480)
+    input_batch = input_batch.astype("float32") / 255.0
+    input_batch = input_batch[np.newaxis,:,:,:]
     click.echo(f'The number of inferences left is {inferences_left["inferences"]}')
     while True:
         inferences_left = client_v2.get_available_inferences()
@@ -95,19 +119,20 @@ def start(address, input):
         if int(inferences_left["inferences"])>0 :
             confirm_run = click.prompt("Run the model ? (R/n)")
             if confirm_run == "R":
-                input_tensors=input_batch
-                run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors)
+                input_tensors=input_batch.flatten().tolist()
+                run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
                 inference_results = run_response.output[0].as_numpy()
-                process_predictions(torch.tensor(inference_results))
+                process_predictions_covid(inference_results)
                 # click.echo(f'Inference results : {inference_results}')
             else:
                 click.echo("Not confirmed.")
         else:
             click.echo("Waiting for new consumption request.")
-            input_tensors=input_batch
-            run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors)
+            input_tensors=input_batch.flatten().tolist()
+            run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
             inference_results = run_response.output[0].as_numpy()
-            process_predictions(torch.tensor(inference_results))
+            # process_predictions(torch.tensor(inference_results))
+            process_predictions_covid(inference_results)
 
 
             
