@@ -24,6 +24,6 @@ fi
 echo "Setting default menu entry for grub to '$MENU_ENTRY'"
 sed -i.bak "s/^GRUB_DEFAULT=.*$/GRUB_DEFAULT=\"$MENU_ENTRY\"/" /etc/default/grub
 
-apt remove linux-image-5.15.0-1045-azure 
+apt remove linux-image-5.15.0-1045-azure -y
 
 update-grub
