@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 apt-get install -y libcurl4 libssl1.1 make cmake jq pkg-config libssl-dev protobuf-compiler curl gnupg software-properties-common
 
 # Intel SGX 

@@ -1,14 +1,19 @@
 #!/bin/bash
 
+set -e
 
 # install rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
+source "$HOME/.cargo/env"
+
 # Changing default to nightly
 rustup default nightly
 rustup target add x86_64-fortanix-unknown-sgx --toolchain nightly
+
 source "$HOME/.cargo/env"
 
+sudo apt install gcc pkg-config libssl-dev protobuf-compiler 
 # Fortanix & Just
 cargo install fortanix-sgx-tools ftxsgx-simulator sgxs-tools --git https://github.com/mithril-security/rust-sgx --branch sim-mode
 

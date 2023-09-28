@@ -23,7 +23,7 @@ run *args:
     | jq -r 'select(.reason=="compiler-artifact" and .target.kind==["bin"]) | .executable'` 
 
   ftxsgx-elf2sgxs "$binpath" \
-    --heap-size 0x4FBA00000 \
+    --heap-size 0x4FBA000 \
     --ssaframesize 1 \
     --stack-size 0x20000 \
     --threads 32
@@ -51,9 +51,9 @@ build *args:
     | jq -r 'select(.reason=="compiler-artifact" and .target.kind==["bin"]) | .executable'` 
     
   ftxsgx-elf2sgxs "$binpath" \
-    --heap-size 0xF00000000 \
+    --heap-size  0xF000000 \
     --ssaframesize 1 \
-    --stack-size 0x400000 \
+    --stack-size 0x020000 \
     --threads 32
 
   just generate-manifest-dev "$binpath.sgxs" 
@@ -217,5 +217,5 @@ release:
   cp manifest.prod.toml client/blindai/manifest.toml
 
   openssl genrsa -3 3072 > my_key.pem
-  sgxs-sign --key my_key.pem  target/x86_64-fortanix-unknown-sgx/release/blindai_server.sgxs   target/x86_64-fortanix-unknown-sgx/release/blindai_server.sig   --xfrm 7/0 --isvprodid 0 --isvsvn 0
+  sgxs-sign --key my_key.pem  target/x86_64-fortanix-unknown-sgx/release/blindai_server.sgxs   target/x86_64-fortanix-unknown-sgx/release/blindai_server.sig   --xfrm 3/0 --isvprodid 0 --isvsvn 0
   ./runner/target/release/runner target/x86_64-fortanix-unknown-sgx/release/blindai_server.sgxs
