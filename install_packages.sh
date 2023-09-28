@@ -2,7 +2,8 @@
 
 set -e
 
-apt-get install -y libcurl4 libssl1.1 make cmake jq pkg-config libssl-dev protobuf-compiler curl gnupg software-properties-common
+apt-get update
+apt-get install -y libcurl4 libssl1.1 libgl1 make cmake jq pkg-config libssl-dev protobuf-compiler curl gnupg software-properties-common
 
 # Intel SGX 
 echo "deb https://download.01.org/intel-sgx/sgx_repo/ubuntu $(lsb_release -cs) main" | tee -a /etc/apt/sources.list.d/intel-sgx.list >/dev/null 
