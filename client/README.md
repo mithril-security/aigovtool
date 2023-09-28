@@ -162,6 +162,8 @@ Run the downgrade_kernel_azure.sh script to downgrade the kernel.
 This will present a warning asking if you want to abort removing the kenrrel you're currently using.
 Select **No** to continue removing the kernel.
 
+![kernel warning](https://github.com/mithril-security/blindai_drm_fli/blob/main/docs/assets/kernel_removal_warning.png)
+
 Once this is done, reboot the VM.
 ```bash
 sudo reboot
