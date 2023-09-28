@@ -22,6 +22,7 @@ export SGX_AESM_ADDR=1
 
 # poetry installation
 curl -sSL https://install.python-poetry.org | python3 -
+export PATH="$HOME/.local/bin:$PATH"
 
 git submodule init
 git submodule update
