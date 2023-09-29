@@ -111,28 +111,28 @@ def start(address, input):
     input_batch = input_batch.astype("float32") / 255.0
     input_batch = input_batch[np.newaxis,:,:,:]
     click.echo(f'The number of inferences left is {inferences_left["inferences"]}')
-    while True:
-        inferences_left = client_v2.get_available_inferences()
-        inferences_left = inferences_left.content.decode("utf-8")
-        inferences_left = json.loads(inferences_left)
-        print(inferences_left)
-        if int(inferences_left["inferences"])>0 :
-            #confirm_run = click.prompt("Run the model ? (R/n)")
-            #if confirm_run == "R":
-            input_tensors=input_batch.flatten().tolist()
-            run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
-            inference_results = run_response.output[0].as_numpy()
-            process_predictions_covid(inference_results)
-            # click.echo(f'Inference results : {inference_results}')
-            #else:
-            #    click.echo("Not confirmed.")
-        else:
-            click.echo("Waiting for new consumption request.")
-            input_tensors=input_batch.flatten().tolist()
-            run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
-            inference_results = run_response.output[0].as_numpy()
-            # process_predictions(torch.tensor(inference_results))
-            process_predictions_covid(inference_results)
+    #while True:
+    inferences_left = client_v2.get_available_inferences()
+    inferences_left = inferences_left.content.decode("utf-8")
+    inferences_left = json.loads(inferences_left)
+    print(inferences_left)
+    if int(inferences_left["inferences"])>0 :
+        #confirm_run = click.prompt("Run the model ? (R/n)")
+        #if confirm_run == "R":
+        input_tensors=input_batch.flatten().tolist()
+        run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
+        inference_results = run_response.output[0].as_numpy()
+        process_predictions_covid(inference_results)
+        # click.echo(f'Inference results : {inference_results}')
+        #else:
+        #    click.echo("Not confirmed.")
+    else:
+        click.echo("Waiting for new consumption request.")
+        input_tensors=input_batch.flatten().tolist()
+        run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
+        inference_results = run_response.output[0].as_numpy()
+        # process_predictions(torch.tensor(inference_results))
+        process_predictions_covid(inference_results)
 
 
             
