@@ -87,14 +87,14 @@ def model_acquire(address):
         for model in models_available:
             click.echo(f'{model.model_name} : {model.model_id}')
             models.append({'model_name':model.model_name, 'model_id':model.model_id })
-        while len(model_to_run) <= 0:
-            model_run = click.prompt('Select the model you want to run :', type=click.Choice([model['model_name'] for model in models]))
-            for i in range(len(models)):
-                if model_run == models[i]['model_name']:
-                    model_to_run = models[i]
-                else:
-                    click.echo("Model typed doesn't exist.")
-    return client_v2, model_to_run
+        #while len(model_to_run) <= 0:
+            #model_run = click.prompt('Select the model you want to run :', type=click.Choice([model['model_name'] for model in models]))
+            #for i in range(len(models)):
+            #    if model_run == models[i]['model_name']:
+            #        model_to_run = models[i]
+            #    else:
+            #        click.echo("Model typed doesn't exist.")
+    return client_v2, models[0]
 
     
 
@@ -117,15 +117,15 @@ def start(address, input):
         inferences_left = json.loads(inferences_left)
         print(inferences_left)
         if int(inferences_left["inferences"])>0 :
-            confirm_run = click.prompt("Run the model ? (R/n)")
-            if confirm_run == "R":
-                input_tensors=input_batch.flatten().tolist()
-                run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
-                inference_results = run_response.output[0].as_numpy()
-                process_predictions_covid(inference_results)
-                # click.echo(f'Inference results : {inference_results}')
-            else:
-                click.echo("Not confirmed.")
+            #confirm_run = click.prompt("Run the model ? (R/n)")
+            #if confirm_run == "R":
+            input_tensors=input_batch.flatten().tolist()
+            run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
+            inference_results = run_response.output[0].as_numpy()
+            process_predictions_covid(inference_results)
+            # click.echo(f'Inference results : {inference_results}')
+            #else:
+            #    click.echo("Not confirmed.")
         else:
             click.echo("Waiting for new consumption request.")
             input_tensors=input_batch.flatten().tolist()
