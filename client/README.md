@@ -151,15 +151,15 @@ _For more examples on the BlindAI project, you can refer to the [Documentation](
 
 ## Pre-requisite steps on Azure
 
-Recently AAzure has upgraded the default kernel on Ubuntu 20.04 to 5.15.0-1045-azure. This breaks the ability to use AVX on SGX enclaves.
-The last known kernel that worked correctl was 5.15.0-1043-azure and therefore we'll downgrade tot hat kernel before we install the blindai-drm server.
+Recently Azure has upgraded the default kernel on Ubuntu 20.04 to 5.15.0-1045-azure. This breaks the ability to use AVX on SGX enclaves.
+The last known kernel that worked correctly was 5.15.0-1043-azure and therefore we'll downgrade to that kernel before we install the blindai-drm server.
 
 Run the downgrade_kernel_azure.sh script to downgrade the kernel.
 ```bash
 ./downgrade_kernel_azure.sh
 ```
 
-This will present a warning asking if you want to abort removing the kenrrel you're currently using.
+This will present a warning asking if you want to abort removing the kernel you're currently using.
 Select **No** to continue removing the kernel.
 
 ![kernel warning](https://github.com/mithril-security/blindai_drm_fli/blob/main/docs/assets/kernel_removal_warning.png)
