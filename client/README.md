@@ -149,12 +149,32 @@ And the blindAI should install on the poetry environment
 
 _For more examples on the BlindAI project, you can refer to the [Documentation](https://blindai.mithrilsecurity.io/en/latest/)_
 
+## Pre-requisite steps on Azure
+
+Recently Azure has upgraded the default kernel on Ubuntu 20.04 to 5.15.0-1045-azure. This breaks the ability to use AVX on SGX enclaves.
+The last known kernel that worked correctly was 5.15.0-1043-azure and therefore we'll downgrade to that kernel before we install the blindai-drm server.
+
+Run the downgrade_kernel_azure.sh script to downgrade the kernel.
+```bash
+./downgrade_kernel_azure.sh
+```
+
+This will present a warning asking if you want to abort removing the kernel you're currently using.
+Select **No** to continue removing the kernel.
+
+![kernel warning](https://github.com/mithril-security/blindai_drm_fli/blob/main/docs/assets/kernel_removal_warning.png)
+
+Once this is done, reboot the VM.
+```bash
+sudo reboot
+```
+
 ## Demo
 
 In this quick demo, we are going to use the COVIDNet model. 
 You can download the COVIDnet model by running the following command : 
 ```bash
-wget --quiet --load-cookies /tmp/cookies.txt \"https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1Rzl_XpV_kBw-lzu_5xYpc8briFd7fjvc' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\\1\\n/p')&id=1Rzl_XpV_kBw-lzu_5xYpc8briFd7fjvc\" -O COVID-Net-CXR-2.onnx && rm -rf /tmp/cookies.txt"
+wget --quiet --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1Rzl_XpV_kBw-lzu_5xYpc8briFd7fjvc' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1Rzl_XpV_kBw-lzu_5xYpc8briFd7fjvc" -O COVID-Net-CXR-2.onnx && rm -rf /tmp/cookies.txt
 ```
 
 The model downloaded will be named as `COVID-Net-CXR-2.onnx`.
@@ -169,6 +189,7 @@ On the **custodian** run the following commands: [in red]
 $ cd client && poetry shell
 $ cd ../drm-blindai && python3 main.py --address=127.0.0.1 --upload=COVID-Net-CXR-2.onnx
 ```
+Pass the path to the COVIDNet model to the 'upload' paramter.
 
 The second line will run the DRM server and wait for the enclave to be ready.
 	
@@ -187,7 +208,7 @@ Let's fetch the CXR image to send to the model:
 ![Image scan](https://raw.githubusercontent.com/lindawangg/COVID-Net/master/assets/ex-covid.jpeg)
 
 ```bash
-!wget --quiet https://raw.githubusercontent.com/lindawangg/COVID-Net/master/assets/ex-covid.jpeg
+wget --quiet https://raw.githubusercontent.com/lindawangg/COVID-Net/master/assets/ex-covid.jpeg
 ```
 
 We can then supply it directly to the client:
@@ -196,7 +217,7 @@ We can then supply it directly to the client:
 $ cd client && poetry shell
 $ cd ../drm-client && python3 main.py --address=127.0.0.1 --input=ex-covid.jpeg
 ```
-
+Pass the path to the ex-covid.jpeg iamge to the 'input' paramter.
 
 
 
