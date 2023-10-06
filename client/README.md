@@ -105,7 +105,7 @@ After connecting to the instance via SSH you can run the following scripts to in
 We begin by cloning the BlindAI DRM repo via github :
 ```bash
 $ git clone https://github.com/mithril-security/BlindAI_drm_fli.git
-$ cd BlindAI_drm_fli/
+$ cd blindai_drm_fli/
 ```
 
 - The first script installs all the dependencies needed for SGX and remote attestation to work perfectly, this one should be ran as root : 
@@ -214,7 +214,7 @@ For the purposes of this demo, we do this on one machine using different termina
 
 In the **custodian** window, you can launch the custodian server and upload your model with the following commands: [in red]
 ```bash
-$ cd ../drm-BlindAI && python3 main.py --address=127.0.0.1 --upload=COVID-Net-CXR-2.onnx
+$ cd drm-blindai && python3 main.py --address=127.0.0.1 --upload=COVID-Net-CXR-2.onnx
 ```
 We pass the path to the COVIDNet model with the `upload` parameter.
 
@@ -249,7 +249,7 @@ wget --quiet https://raw.githubusercontent.com/lindawangg/COVID-Net/master/asset
 
 
 ```bash
-$ cd ../drm-client && python3 main.py --address=127.0.0.1 --input=ex-covid.jpeg
+$ cd drm-client && python3 main.py --address=127.0.0.1 --input=ex-covid.jpeg
 ```
 Pass the path to the ex-covid.jpeg image to the 'input' parameter.
 
