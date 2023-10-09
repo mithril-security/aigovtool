@@ -474,7 +474,7 @@ fn main() -> Result<()> {
                     // let drm_status = DrmStatus {outputs : "No inferences left available.".to_string()};
                     println!("No inferences available left. Requesting new number of inferences.");
 
-                    println!("Requesting 5 Inferences.");
+                    println!("Requesting Inferences.");
 
                     let request_consumption = request_consumption(6, DRM_IP, DRM_PORT, &arc_tls_config_clone);
                     println!("Consumption requested : {:?}", request_consumption);

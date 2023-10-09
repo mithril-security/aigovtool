@@ -1,10 +1,13 @@
+from flask import Flask, request, jsonify
 import click
 import threading
-from flask import Flask, request, jsonify
 import queue 
 import time
+import json
+
 from blindai.core import *
 from drm import drm_server
+
 
 
 
@@ -26,7 +29,10 @@ def enclave_ready_listener(address, upload):
         
     return app
         
-def start_enclave_listener(address: str, upload: str):
+def start_enclave_listener(address: str, upload: str, num_requests: int):
+    with open('inferences.json', 'w') as f:
+        json.dumps({"inferences": str(num_requests)}, f)
+    print(f"number of inferences set up at : {num_requests}")   
     app_r = enclave_ready_listener(address, upload=upload)
     app_r.run(host="0.0.0.0", port="7000", ssl_context=('./localhost.crt', './localhost.key'))
 
@@ -72,9 +78,10 @@ def connect_inference(address, upload, in_remote_attestation_status, out_server_
 
 @click.command()
 @click.option("--address", prompt="Inference server to connect to (format : domain or IP)", default="127.0.0.1", help='Domain or IP of the inference server. (Default Port for blindai)', type=str)
-@click.option("--upload", prompt="Path to the AI model", default=1, help='Path to upload your AI Model (ONNX format).', type=str)
-def start(address, upload):
-    start_enclave_listener(address=address, upload=upload)
+@click.option("--upload", prompt="Path to the AI model", default='./', help='Path to upload your AI Model (ONNX format).', type=str)
+@click.option("--num_requests", prompt="Number of requests granted to the user", default=10, help='Number of requests.', type=int)
+def start(address, upload, num_requests):
+    start_enclave_listener(address=address, upload=upload, num_requests=num_requests)
 
 
 if __name__ == '__main__':
