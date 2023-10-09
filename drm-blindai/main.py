@@ -23,7 +23,7 @@ def enclave_ready_listener(address, upload):
             server_status = queue.Queue()
             threading.Thread(target=connect_inference, args=(address, upload, remote_attestation_status, server_status)).start()
             threading.Thread(target=run_server, args=(remote_attestation_status, server_status)).start()
-            return  {"status" : "Received, begining connection."}
+            return  {"status" : "Received, beginning connection."}
         else:
             return {"error" : "Method not allowed"}
         
@@ -82,6 +82,18 @@ def connect_inference(address, upload, in_remote_attestation_status, out_server_
 @click.option("--num_requests", prompt="Number of requests granted to the user", default=10, help='Number of requests.', type=int)
 def start(address, upload, num_requests):
     start_enclave_listener(address=address, upload=upload, num_requests=num_requests)
+    while True:
+        with open("inferences.json", 'r') as f:
+            inference_tracking = json.load(f)
+        with open("inf_req",'r') as f_req:
+            inference_req = json.load(f_req)
+        if inference_tracking["inferences"] <= 0 and inference_req["request_inference"] is True:
+            inf_proc_req = input("The number of inferences was consumed. \nIf you want to add more type the number you want to give to users :")
+            with open('inferences.json', 'w') as f: 
+                    json.dump({"inferences" : int(inf_proc_req)}, f)
+            with open('inf_req.json', 'w') as f: 
+                json.dump({"request_inference" : False}, f)
+        time.sleep(1)
 
 
 if __name__ == '__main__':

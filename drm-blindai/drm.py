@@ -17,8 +17,8 @@ def drm_server():
             number_inferences = request.form['number_inferences']
             print("* [POST: /request_consumption] Requesting new number of inferences : " + str(number_inferences))
 
-            with open('inferences.json', 'w') as f: 
-                json.dump({"inferences" : str(number_inferences)}, f)
+            with open('inf_req.json', 'w') as f: 
+                json.dump({"request_inference" : True}, f)
             return {"inferences": number_inferences}
         elif request.method == 'GET':
             json_inferences = {}
