@@ -26,12 +26,11 @@ def enclave_ready_listener(address, upload):
             return  {"status" : "Received, beginning connection."}
         else:
             return {"error" : "Method not allowed"}
-        
     return app
         
 def start_enclave_listener(address: str, upload: str, num_requests: int):
     with open('inferences.json', 'w') as f:
-        json.dumps({"inferences": str(num_requests)}, f)
+        json.dump({"inferences": str(num_requests)}, f)
     print(f"number of inferences set up at : {num_requests}")   
     app_r = enclave_ready_listener(address, upload=upload)
     app_r.run(host="0.0.0.0", port="7000", ssl_context=('./localhost.crt', './localhost.key'))
@@ -50,11 +49,6 @@ def run_server(out_remote_attestation_status, in_server_status):
     in_server_status.put("up")
     app.run(host="0.0.0.0", port="6000", ssl_context=('./localhost.crt', './localhost.key'))
 
-# def run_server_mod(in_server_status):
-#     app =drm_server()
-#     in_server_status.put("up")
-#     app.run(host="0.0.0.0", port="6000", ssl_context=('./localhost.crt', './localhost.key'))
-#     state = app.enclave_ready()
 
 def connect_inference(address, upload, in_remote_attestation_status, out_server_status):
     click.echo("Connecting to the Inference Server...") 
@@ -82,19 +76,9 @@ def connect_inference(address, upload, in_remote_attestation_status, out_server_
 @click.option("--num_requests", prompt="Number of requests granted to the user", default=10, help='Number of requests.', type=int)
 def start(address, upload, num_requests):
     start_enclave_listener(address=address, upload=upload, num_requests=num_requests)
-    while True:
-        with open("inferences.json", 'r') as f:
-            inference_tracking = json.load(f)
-        with open("inf_req",'r') as f_req:
-            inference_req = json.load(f_req)
-        if inference_tracking["inferences"] <= 0 and inference_req["request_inference"] is True:
-            inf_proc_req = input("The number of inferences was consumed. \nIf you want to add more type the number you want to give to users :")
-            with open('inferences.json', 'w') as f: 
-                    json.dump({"inferences" : int(inf_proc_req)}, f)
-            with open('inf_req.json', 'w') as f: 
-                json.dump({"request_inference" : False}, f)
-        time.sleep(1)
+
 
 
 if __name__ == '__main__':
     start()
+    

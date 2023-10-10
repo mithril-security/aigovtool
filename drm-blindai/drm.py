@@ -4,10 +4,21 @@ import json
 
 
 # DRM server, goals: 
-#   - listening requests from the Inference Server for comsuption budget
+#   - listening requests from the Inference Server for consumption budget
 #   - sending each inference for tracing
 def drm_server():
     app = Flask(__name__)
+
+    @app.route('/supply_inferences', methods=['POST'])
+    def supply_inferences():
+        if request.method == 'POST':
+            number_inferences = request.form['number_inferences']
+            print("* CUSTODIAN REQ [POST: /request_consumption] Requesting new number of inferences : " + str(number_inferences))
+            with open('inferences.json', 'w') as f: 
+                json.dump({"inferences" : str(number_inferences)}, f)
+            return {"inferences": number_inferences}
+        else:
+            return {"error" : "Method not allowed"}
 
     @app.route('/request_consumption', methods=['POST', 'GET'])
     def request_consumption():
@@ -16,7 +27,6 @@ def drm_server():
             # is allowed
             number_inferences = request.form['number_inferences']
             print("* [POST: /request_consumption] Requesting new number of inferences : " + str(number_inferences))
-
             with open('inf_req.json', 'w') as f: 
                 json.dump({"request_inference" : True}, f)
             return {"inferences": number_inferences}

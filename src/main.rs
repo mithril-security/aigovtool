@@ -492,6 +492,7 @@ fn main() -> Result<()> {
             (GET) (/inferences-left) => {
                 println!("Requesting the number of inferences left.");
                 let inference_left = request_inferences_left(DRM_IP, DRM_PORT, &arc_tls_config_clone).unwrap();
+                println!("Inferences left : {:?}", inference_left);
                 rouille::Response::json(&inference_left)
             },
             _ => rouille::Response::empty_404()

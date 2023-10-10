@@ -827,6 +827,7 @@ class BlindAiConnection(contextlib.AbstractContextManager):
     def get_available_inferences(self):
         try:
             r = self._conn.get(f"{self._attested_url}/inferences-left")
+            print(r)
             r.raise_for_status()
             return r
         except requests.exceptions.HTTPError as err:

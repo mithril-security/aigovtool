@@ -201,3 +201,5 @@ manifest.toml
 drm-blindai/cert.pem
 drm-blindai/key.pem
 src/cert.pem
+
+my_key.pem

@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import requests
 import torch
 import cv2
+import time
 
 def crop_top(img, percent=0.15):
     offset = int(img.shape[0] * percent)
@@ -103,9 +104,11 @@ def model_acquire(address):
 @click.option("--input", prompt="Input that will be processed by the model and the inference server.", default="", help="Only tested for the ResNet Model. Please supply an image.", type=str)
 def start(address, input):
     client_v2, model_to_run = model_acquire(address)
+    print("model selected is :" , model_to_run)
     inferences_left = client_v2.get_available_inferences()
     inferences_left = inferences_left.content.decode("utf-8")
     inferences_left = json.loads(inferences_left)
+    print("inferences restantes : ", inferences_left)
     input_batch = process_input(input)
     input_batch = process_image_file(input, size=480)
     input_batch = input_batch.astype("float32") / 255.0
@@ -127,12 +130,14 @@ def start(address, input):
             else:
                 click.echo("Not confirmed.")
         else:
-            click.echo("Waiting for new consumption request.")
-            input_tensors=input_batch.flatten().tolist()
-            run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
-            inference_results = run_response.output[0].as_numpy()
-            # process_predictions(torch.tensor(inference_results))
-            process_predictions_covid(inference_results)
+            click.echo("Not authorized to run inference. No consumption left.")
+            click.echo("Waiting for the custodian to free more inferences. Retrying in a few seconds...")
+            time.sleep(5)
+            # input_tensors=input_batch.flatten().tolist()
+            # run_response= client_v2.run_model( model_id=model_to_run["model_id"],input_tensors=input_tensors, shapes=[(1,480,480,3)], dtypes=[ModelDatumType.F32])
+            # inference_results = run_response.output[0].as_numpy()
+            # # process_predictions(torch.tensor(inference_results))
+            # process_predictions_covid(inference_results)
 
 
             
