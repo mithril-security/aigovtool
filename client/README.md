@@ -268,7 +268,7 @@ They can cut all end user access to the model at any time by shutting down their
 ![cut-access](./assets/end-user-kill-switch.png)
 
 If there is no inferences left the client will wait for the custodian to free more inferences. This is done through the endpoint `supply_inferences`. A example of a query done by the custodian can be the following: 
-```
+```bash
 curl -k -X POST -d "number_inferences=10" https://127.0.0.1:6000/supply_inferences
 ```
 
