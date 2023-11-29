@@ -9,14 +9,14 @@
     <img src="https://github.com/mithril-security/BlindAI/raw/main/docs/assets/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h1 align="center">BlindAI DRM Proof-Of-Concept</h1>
+<h1 align="center">AIGovTool Proof-Of-Concept</h1>
 
 [![Website][website-shield]][website-url]
 [![Blog][blog-shield]][blog-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
   <p align="center">
-    <b>BlindAI DRM Proof-Of-Concept</b> is an <b>AI privacy solution</b>, allowing AI model providers to 'lend' their AI models for on-premise hosting without exposing their model weights and while retaining full control over usage.	<br /><br />
+    <b>AIGovTool Proof-Of-Concept</b> is an <b>AI privacy solution</b>, allowing AI model providers to 'lend' their AI models for on-premise hosting without exposing their model weights and while retaining full control over usage.	<br /><br />
   </p>
 </div>
 
@@ -45,11 +45,11 @@
 <!-- ABOUT THE PROJECT -->
 ## 🔒 About The Project
 
-**BlindAI DRM POC** is an Open-Source solution enabling AI providers to 'lend' their models for on-premise deployment while **guaranteeing privacy for both their model weights and end user's data**. It includes a DRM Server and client to monitor inference consumption of a particular model and grant or block access.
+**AIGovTool POC** is an Open-Source solution enabling AI providers to 'lend' their models for on-premise deployment while **guaranteeing privacy for both their model weights and end user's data**. It includes a custodian Server and client to monitor inference consumption of a particular model and grant or block access.
 
 
 ### Key actors
-In order to understand BlindAI DRM, let’s first define the three key actors in our secure AI consumption process:
+In order to understand AIGovTool, let’s first define the three key actors in our secure AI consumption process:
 
 - **The custodian​:** Their role is to provide the AI model, track and potentially block AI consumption
 - **The AI borrower**: The borrower deploys the custodian's AI model on their infrastructure. This actor may or may not also be the final end user.
@@ -57,7 +57,7 @@ In order to understand BlindAI DRM, let’s first define the three key actors in
 
 ### Key components
 
-BlindAI DRM is made up of three main components:
+AIGovTool is made up of three main components:
 
 #### The DRM custodian server
 
@@ -88,7 +88,7 @@ In order to run the enclave server, the AI borrower will need to set-up a compat
 There are different VMs available on Azure for running confidential computing applications. 
 
 As we are working on intel SGX, we are going to choose the DCs v3 family which supports Intel SGX (and more precisely SGX 2). To have enough memory to run our models, we choose the 64gb memory with 8-vcpus.
-![Azure VM](https://github.com/mithril-security/BlindAI_drm_fli/blob/main/docs/assets/set_up.png)
+![Azure VM](https://github.com/mithril-security/aigovtool/blob/main/docs/assets/set_up.png)
 
 After the creation of the instance, we can connect to it via SSH. You can do this in `Visual Studio Code` with the `remote container VSCode extension`.
 
@@ -102,10 +102,10 @@ Once you have installed this extension, you can click on the green menu in the b
 ### Setting up Intel SGX and the required dependencies 
 After connecting to the instance via SSH you can run the following scripts to install SGX, rust, and all the configuration needed to run our BlindAI secure enclave. 
 
-We begin by cloning the BlindAI DRM repo via github :
+We begin by cloning the AIGovTool repo via github :
 ```bash
-$ git clone https://github.com/mithril-security/BlindAI_drm_fli.git
-$ cd blindai_drm_fli/
+$ git clone https://github.com/mithril-security/aigovtool.git
+$ cd aigovtool/
 ```
 
 - The first script installs all the dependencies needed for SGX and remote attestation to work perfectly, this one should be ran as root : 
@@ -166,7 +166,7 @@ _For more examples on the BlindAI project, you can refer to the [Documentation](
 ## Pre-requisite steps on Azure
 
 Recently Azure has upgraded the default kernel on Ubuntu 20.04 to 5.15.0-1045-azure. This breaks the ability to use AVX on SGX enclaves.
-The last known kernel that worked correctly was 5.15.0-1043-azure and therefore we'll downgrade to that kernel before we install the BlindAI-drm server.
+The last known kernel that worked correctly was 5.15.0-1043-azure and therefore we'll downgrade to that kernel before we install the AIGovTool server.
 
 Run the downgrade_kernel_azure.sh script to downgrade the kernel.
 ```bash
@@ -176,7 +176,7 @@ Run the downgrade_kernel_azure.sh script to downgrade the kernel.
 This will present a warning asking if you want to abort removing the kernel you're currently using.
 Select **No** to continue removing the kernel.
 
-![kernel warning](https://github.com/mithril-security/BlindAI_drm_fli/blob/main/docs/assets/kernel_removal_warning.png)
+![kernel warning](https://github.com/mithril-security/aigovtool/blob/main/docs/assets/kernel_removal_warning.png)
 
 Once this is done, reboot the VM.
 ```bash
@@ -187,7 +187,7 @@ sudo reboot
 
 All parties: the custodian, AI borrower and end user can use our poetry environment to install the required BlindAI client.
 
-To do this, you can run the following from the root of the BlindAI_drm_fli repo:
+To do this, you can run the following from the root of the AIGovTool repo:
 
 ```bash
 $ cd client/ && poetry shell
@@ -196,7 +196,7 @@ $ poetry install
 
 ## Demo
 
-In this demo, we are going to show a quick example of controlled AI consumption using BlindAI DRM with the COVIDNet model, which takes images of patient chest x-rays and returns a probability of this patient having Covid.
+In this demo, we are going to show a quick example of controlled AI consumption using AIGovTool with the COVIDNet model, which takes images of patient chest x-rays and returns a probability of this patient having Covid.
 
 You can download the COVIDnet model by running the following command : 
 ```bash
@@ -208,7 +208,7 @@ The model downloaded will be named as `COVID-Net-CXR-2.onnx`.
 
 For the purposes of this demo, we do this on one machine using different terminal windows to show the view of each key party involved. In order to follow along on one machine, please open three terminals on your VM.
 
-![terminals](https://github.com/mithril-security/BlindAI_drm_fli/blob/main/docs/assets/fli_1.png)
+![terminals](https://github.com/mithril-security/aigovtool/blob/main/docs/assets/fli_1.png)
 
 ### Custodian launches their server
 
@@ -228,12 +228,12 @@ Once the enclave server has been launched and verification is completed, we will
 
 In the **Enclave** window : [in green] 
 
-You can launch the enclave server and BlindAI using our `justfile` with the following command from the root of the BlindAI_drm_fli repo: 
+You can launch the enclave server and BlindAI using our `justfile` with the following command from the root of the aigovtool repo: 
 
 ```bash
 $ BLINDAI_AZURE_DCS3_PATCH=1 just release 
 ```
-You may need to wait a few minutes for the server to start running and connect to the DRM server.
+You may need to wait a few minutes for the server to start running and connect to the DRM custodian server.
 	
 On the **customer** : [in blue]
 
@@ -278,7 +278,7 @@ curl -k -X POST -d "number_inferences=10" https://127.0.0.1:6000/supply_inferenc
 ## 🙋 Getting help
 
 * Go to our [Discord](https://discord.com/invite/TxEHagpWd4) #support channel
-* Report bugs by [opening an issue on our BlindAI GitHub](https://github.com/mithril-security/blindai_drm_fli/issues)
+* Report bugs by [opening an issue on our BlindAI GitHub](https://github.com/mithril-security/aigovtool/issues)
 * [Book a meeting](https://calendly.com/contact-mithril-security/15mins?month=2023-03) with us
 
 
@@ -292,7 +292,7 @@ Distributed under the Apache License, version 2.0. See [`LICENSE.md`](https://ww
 
 Mithril Security - [@MithrilSecurity](https://twitter.com/MithrilSecurity) - contact@mithrilsecurity.io
 
-Project Link: [https://github.com/mithril-security/BlindAI](https://github.com/mithril-security/blindai_drm_fli)
+Project Link: [https://github.com/mithril-security/BlindAI](https://github.com/mithril-security/aigovtool)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
